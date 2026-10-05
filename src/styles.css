@@ -1,74 +1,152 @@
-/* identidad visual de cinenice: cine oscuro con acento dorado (cinta de entrada) */
+/* identidad visual de cinenice: cine antiguo de barrio.
+   negro de sala, beige de papel de entrada y rojo de telon. nada de neon ni degradados futuristas */
 :root {
-  /* paleta */
-  --color-fondo: #0f0d14;
-  --color-superficie: #1a1722;
-  --color-superficie-2: #252132;
-  --color-borde: #34304a;
-  --color-texto: #f4efe6;
-  --color-texto-suave: #a9a3b8;
-  --color-acento: #e8b04a;      /* dorado: acciones principales */
-  --color-peligro: #d1495b;     /* rojo butaca: errores y ocupadas */
-  --color-exito: #4cc9a4;
-  --color-vip: #b98cff;         /* butacas vip */
-  --color-accesible: #5aa9ff;   /* butacas accesibles */
+  /* paleta base */
+  --negro: #130e0c;
+  --negro-2: #1d1612;
+  --beige: #ecdfc4;
+  --beige-claro: #f6eedb;
+  --papel: #f1e6cc;          /* fondo de las entradas / tarjetas */
+  --tinta: #2a1b15;          /* texto sobre papel */
+  --rojo: #9b1c24;           /* telon */
+  --rojo-claro: #b8323a;
+  --rojo-oscuro: #6d1017;
+  --laton: #b89b63;          /* detalles metalicos, usado con moderacion */
 
-  /* tipografia: titulos condensados, texto legible. con fallback por si no carga la fuente */
-  --fuente-titulo: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
-  --fuente-texto: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* tokens semanticos (los componentes usan solo estos) */
+  --color-fondo: var(--negro);
+  --color-superficie: var(--negro-2);
+  --color-superficie-2: #2a2019;
+  --color-borde: #4a3a2c;
+  --color-texto: var(--beige);
+  --color-texto-suave: #b3a285;
+  --color-acento: var(--rojo);
+  --color-link: #e3c48a;
+  --color-peligro: #ee8a84;
+  --color-exito: #8fb573;
+  --color-vip: #d2a94a;        /* butacas vip: latón dorado */
+  --color-accesible: #6f9fc7;  /* butacas accesibles: azul apagado */
 
-  /* espaciado y forma */
+  /* tipografia: titulos art deco de marquesina, texto serif, etiquetas de maquina de escribir */
+  --fuente-titulo: 'Limelight', 'Playfair Display', Georgia, serif;
+  --fuente-texto: 'Lora', Georgia, 'Times New Roman', serif;
+  --fuente-maquina: 'Courier Prime', 'Courier New', monospace;
+
+  /* espaciado y forma: esquinas casi rectas, como el papel */
   --espacio-1: 4px; --espacio-2: 8px; --espacio-3: 12px;
   --espacio-4: 16px; --espacio-6: 24px; --espacio-8: 32px;
-  --radio: 10px;
-  --sombra: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --radio: 3px;
+  --sombra: 0 3px 0 rgba(0, 0, 0, 0.35);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--color-fondo);
+  background-color: var(--negro);
+  /* grano de pelicula sutil sobre el negro */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .93  0 0 0 0 .87  0 0 0 0 .75  0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E");
   color: var(--color-texto);
   font-family: var(--fuente-texto);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-h1, h2, h3 { font-family: var(--fuente-titulo); letter-spacing: 0.04em; font-weight: 400; margin: 0 0 var(--espacio-3); }
-h1 { font-size: 2.4rem; }
-h2 { font-size: 1.8rem; }
+/* telones laterales: solo aparecen cuando sobra espacio a los costados del contenido (pantallas anchas) */
+body::before, body::after {
+  content: '';
+  position: fixed; top: 0; bottom: 0; z-index: 0;
+  width: clamp(0px, calc((100vw - 1240px) / 2), 150px);
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.35) 0, rgba(255,255,255,.06) 12px, rgba(0,0,0,.35) 24px),
+    linear-gradient(180deg, var(--rojo-claro), var(--rojo) 40%, var(--rojo-oscuro));
+  pointer-events: none;
+}
+body::before { left: 0; box-shadow: inset -14px 0 22px rgba(0,0,0,.55); }
+body::after  { right: 0; box-shadow: inset 14px 0 22px rgba(0,0,0,.55); }
+
+h1, h2, h3 { color: var(--color-texto); margin: 0 0 var(--espacio-3); font-weight: 400; }
+h1, h2 { font-family: var(--fuente-titulo); letter-spacing: 0.03em; }
+h1 { font-size: 2.1rem; padding-bottom: var(--espacio-2); border-bottom: 3px double var(--laton); margin-bottom: var(--espacio-4); }
+h2 { font-size: 1.6rem; }
+h3 { font-family: var(--fuente-texto); font-weight: 700; font-size: 1.1rem; }
+
+a { color: var(--color-link); }
 
 /* componentes base reutilizables (se usan en todas las pantallas, sin variantes por pantalla) */
+
+/* entrada de cine: papel beige con muescas laterales. redefine los tokens para que todo lo de adentro se lea sobre papel */
+.tarjeta {
+  --color-texto: var(--tinta);
+  --color-texto-suave: #6c5646;
+  --color-borde: #c2aa7c;
+  --color-fondo: #faf3e1;
+  --color-superficie-2: #e6d6b2;
+  --color-peligro: #a3202a;
+  --color-acento: var(--rojo);
+  --color-link: var(--rojo);
+  position: relative; z-index: 1;
+  background: var(--papel);
+  color: var(--color-texto);
+  border: 1px solid var(--laton);
+  border-radius: var(--radio);
+  padding: var(--espacio-4);
+  -webkit-mask:
+    radial-gradient(circle 9px at 0 50%, #0000 96%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 9px at 100% 50%, #0000 96%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 9px at 0 50%, #0000 96%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 9px at 100% 50%, #0000 96%, #000) right / 51% 100% no-repeat;
+}
+
 .boton {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--espacio-2);
   padding: var(--espacio-2) var(--espacio-4);
-  border: 0; border-radius: var(--radio); cursor: pointer;
-  background: var(--color-acento); color: var(--color-fondo);
-  font: 600 0.95rem var(--fuente-texto); text-decoration: none;
+  border: 1px solid var(--rojo-oscuro); border-radius: var(--radio); cursor: pointer;
+  background: var(--rojo); color: var(--beige-claro);
+  font: 700 0.8rem var(--fuente-maquina); letter-spacing: 0.08em; text-transform: uppercase;
+  text-decoration: none; box-shadow: var(--sombra);
 }
-.boton:hover { filter: brightness(1.08); }
+.boton:hover { background: var(--rojo-claro); }
+.boton:active { transform: translateY(2px); box-shadow: none; }
 .boton:disabled { opacity: 0.5; cursor: not-allowed; }
-.boton-secundario { background: var(--color-superficie-2); color: var(--color-texto); border: 1px solid var(--color-borde); }
-
-.tarjeta {
-  background: var(--color-superficie); border: 1px solid var(--color-borde);
-  border-radius: var(--radio); padding: var(--espacio-4); box-shadow: var(--sombra);
-}
+.boton-secundario { background: var(--color-superficie-2); color: var(--color-texto); border-color: var(--color-borde); }
+.boton-secundario:hover { background: var(--color-borde); }
 
 .campo { display: flex; flex-direction: column; gap: var(--espacio-1); margin-bottom: var(--espacio-3); }
-.campo label { font-size: 0.85rem; color: var(--color-texto-suave); }
+.campo label {
+  font: 700 0.72rem var(--fuente-maquina); letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--color-texto-suave);
+}
 .campo input, .campo select, .campo textarea {
   padding: var(--espacio-2) var(--espacio-3);
   background: var(--color-fondo); color: var(--color-texto);
   border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit;
 }
-.campo input:focus, .campo select:focus, .campo textarea:focus { outline: 2px solid var(--color-acento); outline-offset: 1px; }
+.campo input:focus, .campo select:focus, .campo textarea:focus { outline: 2px solid var(--rojo); outline-offset: 1px; }
 
 .error { color: var(--color-peligro); font-size: 0.85rem; margin: 0; }
 
+/* chip: sello de entrada. activo = sellado en rojo */
 .chip {
   display: inline-block; padding: var(--espacio-1) var(--espacio-3);
-  border: 1px solid var(--color-borde); border-radius: 999px;
-  background: var(--color-superficie-2); color: var(--color-texto); font-size: 0.85rem; cursor: pointer;
+  border: 1px solid var(--color-borde); border-radius: var(--radio);
+  background: var(--color-superficie-2); color: var(--color-texto);
+  font: 700 0.72rem var(--fuente-maquina); letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
 }
-.chip.activo { background: var(--color-acento); color: var(--color-fondo); border-color: var(--color-acento); }
+.chip.activo { background: var(--rojo); color: var(--beige-claro); border-color: var(--rojo-oscuro); }
+
+/* utilidades de formularios y textos auxiliares */
+.formulario-ancho { max-width: 720px; margin: 0 auto; }
+.formulario-angosto { max-width: 400px; margin: 0 auto; }
+.grilla-form { display: grid; gap: 0 var(--espacio-4); }
+@media (min-width: 640px) { .grilla-form { grid-template-columns: 1fr 1fr; } }
+.fila-acciones { display: flex; align-items: center; gap: var(--espacio-4); margin-top: var(--espacio-3); flex-wrap: wrap; }
+.ayuda { color: var(--color-texto-suave); font-size: 0.85rem; }
+.separador { text-align: center; color: var(--color-texto-suave); margin: var(--espacio-3) 0; font: 0.8rem var(--fuente-maquina); text-transform: uppercase; letter-spacing: 0.1em; }
+.insignia {
+  display: inline-block; padding: 1px var(--espacio-2); border-radius: var(--radio);
+  background: transparent; border: 1px solid var(--color-borde);
+  font: 700 0.7rem var(--fuente-maquina); letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-texto-suave);
+}
+.insignia.edad-13 { color: #8a5a12; border-color: #8a5a12; }
+.insignia.edad-18 { color: var(--rojo); border-color: var(--rojo); }

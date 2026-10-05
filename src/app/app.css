@@ -1,35 +1,58 @@
-/* shell responsive: mobile-first. los colores salen de los tokens de styles.css */
+/* shell: cortina de terciopelo arriba (con festones), marquesina como marca y contenido sobre la sala */
 :host { display: block; min-height: 100vh; }
 
 .barra {
   position: sticky; top: 0; z-index: 10;
   display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-3);
   padding: var(--espacio-3) var(--espacio-4);
-  background: var(--color-superficie);
-  border-bottom: 1px solid var(--color-borde);
+  color: var(--beige);
+  /* pliegues verticales del terciopelo + degradado de luz */
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.3) 0, rgba(255,255,255,.07) 12px, rgba(0,0,0,.3) 24px),
+    linear-gradient(180deg, var(--rojo-claro), var(--rojo) 55%, var(--rojo-oscuro));
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
 }
-.marca {
-  font-family: var(--fuente-titulo); font-size: 1.8rem; letter-spacing: 0.08em;
-  color: var(--color-texto); text-decoration: none;
+/* festones colgando del borde inferior, como el cortinado de un teatro */
+.barra::after {
+  content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 14px;
+  background: radial-gradient(circle at 50% 0, var(--rojo-oscuro) 13px, transparent 14px) 0 0 / 28px 14px repeat-x;
+  pointer-events: none;
 }
-.marca span { color: var(--color-acento); }
 
-.barra-nav { display: flex; gap: var(--espacio-2); flex: 1 1 100%; order: 3; }
-.barra-nav a {
-  padding: var(--espacio-2) var(--espacio-3); border-radius: var(--radio);
-  color: var(--color-texto-suave); text-decoration: none; font-size: 0.95rem;
+/* marquesina: letras art deco con marco de lamparitas (borde punteado) */
+.marca {
+  font-family: var(--fuente-titulo); font-size: 1.5rem; letter-spacing: 0.12em;
+  color: var(--beige-claro); text-decoration: none;
+  padding: 2px var(--espacio-3);
+  border: 4px dotted var(--beige);
+  background: var(--negro);
+  text-shadow: 0 0 6px rgba(236, 223, 196, 0.35);
 }
-.barra-nav a:hover { color: var(--color-texto); background: var(--color-superficie-2); }
-.barra-nav a.activo { color: var(--color-fondo); background: var(--color-acento); font-weight: 600; }
+
+.barra-nav { display: flex; gap: var(--espacio-1); flex: 1 1 100%; order: 3; }
+.barra-nav a {
+  padding: var(--espacio-2) var(--espacio-3);
+  color: var(--beige); text-decoration: none;
+  font: 700 0.78rem var(--fuente-maquina); letter-spacing: 0.1em; text-transform: uppercase;
+  border-bottom: 2px solid transparent;
+}
+.barra-nav a:hover { border-bottom-color: var(--beige); }
+.barra-nav a.activo { background: var(--negro); color: var(--beige-claro); border-bottom-color: var(--laton); }
 
 .barra-sesion { margin-left: auto; display: flex; align-items: center; gap: var(--espacio-3); }
-.saludo { color: var(--color-texto-suave); font-size: 0.9rem; }
+.saludo { font: 0.85rem var(--fuente-maquina); }
 
-.contenido { padding: var(--espacio-4); max-width: 1200px; margin: 0 auto; }
+/* los botones de la barra se invierten para no perderse sobre el rojo */
+.barra .boton { background: var(--beige); color: var(--tinta); border-color: var(--beige); box-shadow: none; }
+.barra .boton:hover { background: var(--beige-claro); }
+.barra .boton-secundario { background: transparent; color: var(--beige); border-color: var(--beige); }
+.barra .boton-secundario:hover { background: rgba(0, 0, 0, 0.25); }
+
+.contenido { position: relative; z-index: 1; padding: var(--espacio-6) var(--espacio-4); max-width: 1200px; margin: 0 auto; }
 
 /* en pantallas grandes el nav va en la misma linea */
 @media (min-width: 700px) {
   .barra { padding: var(--espacio-3) var(--espacio-6); }
   .barra-nav { flex: 0 1 auto; order: 0; }
-  .contenido { padding: var(--espacio-6); }
+  .contenido { padding: var(--espacio-8) var(--espacio-6); }
 }
