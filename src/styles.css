@@ -1,0 +1,74 @@
+/* identidad visual de cinenice: cine oscuro con acento dorado (cinta de entrada) */
+:root {
+  /* paleta */
+  --color-fondo: #0f0d14;
+  --color-superficie: #1a1722;
+  --color-superficie-2: #252132;
+  --color-borde: #34304a;
+  --color-texto: #f4efe6;
+  --color-texto-suave: #a9a3b8;
+  --color-acento: #e8b04a;      /* dorado: acciones principales */
+  --color-peligro: #d1495b;     /* rojo butaca: errores y ocupadas */
+  --color-exito: #4cc9a4;
+  --color-vip: #b98cff;         /* butacas vip */
+  --color-accesible: #5aa9ff;   /* butacas accesibles */
+
+  /* tipografia: titulos condensados, texto legible. con fallback por si no carga la fuente */
+  --fuente-titulo: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+  --fuente-texto: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* espaciado y forma */
+  --espacio-1: 4px; --espacio-2: 8px; --espacio-3: 12px;
+  --espacio-4: 16px; --espacio-6: 24px; --espacio-8: 32px;
+  --radio: 10px;
+  --sombra: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente-texto);
+  line-height: 1.5;
+}
+
+h1, h2, h3 { font-family: var(--fuente-titulo); letter-spacing: 0.04em; font-weight: 400; margin: 0 0 var(--espacio-3); }
+h1 { font-size: 2.4rem; }
+h2 { font-size: 1.8rem; }
+
+/* componentes base reutilizables (se usan en todas las pantallas, sin variantes por pantalla) */
+.boton {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--espacio-2);
+  padding: var(--espacio-2) var(--espacio-4);
+  border: 0; border-radius: var(--radio); cursor: pointer;
+  background: var(--color-acento); color: var(--color-fondo);
+  font: 600 0.95rem var(--fuente-texto); text-decoration: none;
+}
+.boton:hover { filter: brightness(1.08); }
+.boton:disabled { opacity: 0.5; cursor: not-allowed; }
+.boton-secundario { background: var(--color-superficie-2); color: var(--color-texto); border: 1px solid var(--color-borde); }
+
+.tarjeta {
+  background: var(--color-superficie); border: 1px solid var(--color-borde);
+  border-radius: var(--radio); padding: var(--espacio-4); box-shadow: var(--sombra);
+}
+
+.campo { display: flex; flex-direction: column; gap: var(--espacio-1); margin-bottom: var(--espacio-3); }
+.campo label { font-size: 0.85rem; color: var(--color-texto-suave); }
+.campo input, .campo select, .campo textarea {
+  padding: var(--espacio-2) var(--espacio-3);
+  background: var(--color-fondo); color: var(--color-texto);
+  border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit;
+}
+.campo input:focus, .campo select:focus, .campo textarea:focus { outline: 2px solid var(--color-acento); outline-offset: 1px; }
+
+.error { color: var(--color-peligro); font-size: 0.85rem; margin: 0; }
+
+.chip {
+  display: inline-block; padding: var(--espacio-1) var(--espacio-3);
+  border: 1px solid var(--color-borde); border-radius: 999px;
+  background: var(--color-superficie-2); color: var(--color-texto); font-size: 0.85rem; cursor: pointer;
+}
+.chip.activo { background: var(--color-acento); color: var(--color-fondo); border-color: var(--color-acento); }

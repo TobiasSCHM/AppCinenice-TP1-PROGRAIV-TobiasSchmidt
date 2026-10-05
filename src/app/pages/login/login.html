@@ -1,0 +1,20 @@
+<section class="tarjeta" style="max-width: 400px; margin: 0 auto;">
+  <h2>Ingresar</h2>
+  <div class="campo">
+    <label for="email">Correo</label>
+    <input id="email" type="email" autocomplete="email"
+           [value]="email()" (input)="email.set($any($event.target).value)" />
+  </div>
+  <div class="campo">
+    <label for="password">Contrasena</label>
+    <input id="password" type="password" autocomplete="current-password"
+           [value]="password()" (input)="password.set($any($event.target).value)"
+           (keydown.enter)="ingresar()" />
+  </div>
+  @if (error(); as e) {
+    <p class="error" role="alert">{{ e }}</p>
+  }
+  <button type="button" class="boton" [disabled]="cargando()" (click)="ingresar()">
+    {{ cargando() ? 'Ingresando...' : 'Ingresar' }}
+  </button>
+</section>

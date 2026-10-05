@@ -1,0 +1,26 @@
+<header class="barra">
+  <a class="marca" routerLink="/">CINE<span>NICE</span></a>
+
+  <nav class="barra-nav">
+    <a routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Cartelera</a>
+    @if (auth.rol() === 'admin') {
+      <a routerLink="/admin" routerLinkActive="activo">Admin</a>
+    }
+    @if (auth.rol() === 'admin' || auth.rol() === 'empleado') {
+      <a routerLink="/empleado" routerLinkActive="activo">Validar QR</a>
+    }
+  </nav>
+
+  <div class="barra-sesion">
+    @if (auth.session(); as s) {
+      <span class="saludo">{{ auth.perfil()?.nombre ?? s.user.email }}</span>
+      <button type="button" class="boton boton-secundario" (click)="salir()">Salir</button>
+    } @else {
+      <a class="boton" routerLink="/login">Ingresar</a>
+    }
+  </div>
+</header>
+
+<main class="contenido">
+  <router-outlet />
+</main>

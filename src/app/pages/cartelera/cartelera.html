@@ -1,0 +1,9 @@
+<h1>Cartelera</h1>
+<div class="tarjeta">
+  <p>Proximamente: peliculas, buscador y funciones.</p>
+  @if (auth.perfil(); as p) {
+    <p>Sesion iniciada como <strong>{{ p.email }}</strong> con rol <strong>{{ p.rol }}</strong>.</p>
+  } @else {
+    <p>Navegas como visitante.</p>
+  }
+</div>

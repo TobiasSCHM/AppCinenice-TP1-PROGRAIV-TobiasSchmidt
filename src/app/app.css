@@ -1,0 +1,35 @@
+/* shell responsive: mobile-first. los colores salen de los tokens de styles.css */
+:host { display: block; min-height: 100vh; }
+
+.barra {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-4);
+  background: var(--color-superficie);
+  border-bottom: 1px solid var(--color-borde);
+}
+.marca {
+  font-family: var(--fuente-titulo); font-size: 1.8rem; letter-spacing: 0.08em;
+  color: var(--color-texto); text-decoration: none;
+}
+.marca span { color: var(--color-acento); }
+
+.barra-nav { display: flex; gap: var(--espacio-2); flex: 1 1 100%; order: 3; }
+.barra-nav a {
+  padding: var(--espacio-2) var(--espacio-3); border-radius: var(--radio);
+  color: var(--color-texto-suave); text-decoration: none; font-size: 0.95rem;
+}
+.barra-nav a:hover { color: var(--color-texto); background: var(--color-superficie-2); }
+.barra-nav a.activo { color: var(--color-fondo); background: var(--color-acento); font-weight: 600; }
+
+.barra-sesion { margin-left: auto; display: flex; align-items: center; gap: var(--espacio-3); }
+.saludo { color: var(--color-texto-suave); font-size: 0.9rem; }
+
+.contenido { padding: var(--espacio-4); max-width: 1200px; margin: 0 auto; }
+
+/* en pantallas grandes el nav va en la misma linea */
+@media (min-width: 700px) {
+  .barra { padding: var(--espacio-3) var(--espacio-6); }
+  .barra-nav { flex: 0 1 auto; order: 0; }
+  .contenido { padding: var(--espacio-6); }
+}
