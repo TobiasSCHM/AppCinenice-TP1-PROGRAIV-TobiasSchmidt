@@ -1,0 +1,5 @@
+.alta { max-width: 420px; margin-bottom: var(--espacio-6); }
+.lista { display: grid; gap: var(--espacio-3); }
+.fila { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--espacio-3); }
+.fila h3, .fila p { margin: 0; }
+.acciones { display: flex; gap: var(--espacio-2); flex-wrap: wrap; }

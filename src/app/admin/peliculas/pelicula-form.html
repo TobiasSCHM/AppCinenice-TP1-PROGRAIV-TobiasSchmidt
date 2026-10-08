@@ -1,0 +1,88 @@
+<h1>{{ esEdicion() ? 'Editar película' : 'Nueva película' }}</h1>
+
+@if (cargandoPelicula()) {
+  <p class="ayuda">Cargando película…</p>
+}
+
+<form class="tarjeta" [formRoot]="formulario" (submit)="$event.preventDefault()">
+  <div class="contenedor">
+    <div class="columna-poster">
+      <div class="poster">
+        @if (imagenMostrada(); as src) {
+          <img [src]="src" alt="Vista previa del póster" />
+        } @else {
+          <span class="ayuda">Sin imagen</span>
+        }
+      </div>
+      <label class="boton boton-secundario" for="poster">Elegir póster</label>
+      <input id="poster" class="oculto" type="file" accept="image/*" (change)="alElegirImagen($event)" />
+      @if (errorImagen(); as e) {
+        <p class="error">{{ e }}</p>
+      }
+    </div>
+
+    <div class="columna-datos">
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" [formField]="formulario.nombre" />
+        <app-errores-campo [estado]="formulario.nombre()" />
+      </div>
+
+      <div class="campo">
+        <label for="sinopsis">Sinopsis</label>
+        <textarea id="sinopsis" rows="4" [formField]="formulario.sinopsis"></textarea>
+        <app-errores-campo [estado]="formulario.sinopsis()" />
+      </div>
+
+      <div class="campo">
+        <label for="duracion">Duración (minutos)</label>
+        <input id="duracion" type="number" inputmode="numeric" [formField]="formulario.duracion_min" />
+        <app-errores-campo [estado]="formulario.duracion_min()" />
+      </div>
+
+      <div class="campo">
+        <span class="etiqueta">Restricción de edad</span>
+        <div class="chips">
+          @for (o of opcionesEdad; track o.valor) {
+            <button type="button" class="chip" [class.activo]="borrador().restriccion_edad === o.valor"
+                    (click)="fijarEdad(o.valor)">{{ o.etiqueta }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="campo">
+        <span class="etiqueta">Géneros</span>
+        <div class="chips">
+          @for (g of generos(); track g.id) {
+            <button type="button" class="chip" [class.activo]="generoIds().includes(g.id)"
+                    (click)="alternarGenero(g.id)">{{ g.nombre }}</button>
+          }
+        </div>
+        <div class="nuevo-genero">
+          <input placeholder="Nuevo género" [value]="nuevoGenero()"
+                 (input)="nuevoGenero.set($any($event.target).value)" (keydown.enter)="agregarGenero(); $event.preventDefault()" />
+          <button type="button" class="boton boton-secundario" (click)="agregarGenero()">Agregar</button>
+        </div>
+        @if (errorGeneros(); as e) {
+          <p class="error">{{ e }}</p>
+        }
+      </div>
+
+      <label class="check">
+        <input type="checkbox" [formField]="formulario.visible_portada" />
+        Mostrar en la portada
+      </label>
+    </div>
+  </div>
+
+  @if (errorEnvio(); as e) {
+    <p class="error" role="alert">{{ e }}</p>
+  }
+
+  <div class="fila-acciones">
+    <button type="submit" class="boton" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando…' : 'Guardar película' }}
+    </button>
+    <a routerLink="/admin/peliculas">Cancelar</a>
+  </div>
+</form>

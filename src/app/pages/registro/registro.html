@@ -1,0 +1,90 @@
+<section class="tarjeta formulario-ancho">
+  <h2>Crear cuenta</h2>
+
+  @if (revisarCorreo()) {
+    <p>Te enviamos un correo para confirmar tu cuenta. Una vez confirmada, ya podés ingresar.</p>
+    <a class="boton" routerLink="/login">Ir a ingresar</a>
+  } @else {
+    <button type="button" class="boton boton-secundario" (click)="conGoogle()">Registrarme con Google</button>
+    <p class="separador">o completá tus datos</p>
+
+    <form [formRoot]="formulario" (submit)="$event.preventDefault()">
+      <div class="grilla-form">
+        <div class="campo">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" autocomplete="given-name" [formField]="formulario.nombre" />
+          <app-errores-campo [estado]="formulario.nombre()" />
+        </div>
+        <div class="campo">
+          <label for="apellido">Apellido</label>
+          <input id="apellido" autocomplete="family-name" [formField]="formulario.apellido" />
+          <app-errores-campo [estado]="formulario.apellido()" />
+        </div>
+
+        <div class="campo">
+          <label for="email">Correo</label>
+          <input id="email" type="email" autocomplete="email" [formField]="formulario.email" />
+          <app-errores-campo [estado]="formulario.email()" />
+        </div>
+        <div class="campo">
+          <label for="fecha">Fecha de nacimiento</label>
+          <input id="fecha" type="date" autocomplete="bday" [formField]="formulario.fecha_nacimiento" />
+          @if (borrador().fecha_nacimiento | edad; as e) {
+            <small class="ayuda">{{ e }} años</small>
+          }
+          <app-errores-campo [estado]="formulario.fecha_nacimiento()" />
+        </div>
+
+        <div class="campo">
+          <label for="sangre">Tipo de sangre</label>
+          <select id="sangre" [formField]="formulario.tipo_sangre">
+            <option value="">Elegir…</option>
+            @for (t of tiposSangre; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+          <app-errores-campo [estado]="formulario.tipo_sangre()" />
+        </div>
+        <div class="campo">
+          <label for="ojos">Color de ojos</label>
+          <select id="ojos" [formField]="formulario.color_ojos">
+            <option value="">Elegir…</option>
+            @for (c of coloresOjos; track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+          <app-errores-campo [estado]="formulario.color_ojos()" />
+        </div>
+
+        <div class="campo">
+          <label for="vacaciones">Días de vacaciones por año</label>
+          <input id="vacaciones" type="number" inputmode="numeric" [formField]="formulario.dias_vacaciones" />
+          <app-errores-campo [estado]="formulario.dias_vacaciones()" />
+        </div>
+        <div class="campo"></div>
+
+        <div class="campo">
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" autocomplete="new-password" [formField]="formulario.password" />
+          <app-errores-campo [estado]="formulario.password()" />
+        </div>
+        <div class="campo">
+          <label for="confirmar">Repetir contraseña</label>
+          <input id="confirmar" type="password" autocomplete="new-password" [formField]="formulario.confirmar" />
+          <app-errores-campo [estado]="formulario.confirmar()" />
+        </div>
+      </div>
+
+      @if (errorEnvio(); as e) {
+        <p class="error" role="alert">{{ e }}</p>
+      }
+
+      <div class="fila-acciones">
+        <button type="submit" class="boton" [disabled]="guardando()">
+          {{ guardando() ? 'Creando cuenta…' : 'Crear cuenta' }}
+        </button>
+        <a routerLink="/login">Ya tengo cuenta</a>
+      </div>
+    </form>
+  }
+</section>

@@ -1,0 +1,38 @@
+<h1>Salas</h1>
+
+<form class="tarjeta alta" (submit)="$event.preventDefault(); crear()">
+  <div class="campo">
+    <label for="nombre-sala">Nombre de la nueva sala</label>
+    <input id="nombre-sala" [value]="nombre()" (input)="nombre.set($any($event.target).value)" />
+  </div>
+  <button type="submit" class="boton" [disabled]="guardando()">
+    {{ guardando() ? 'Creando…' : 'Crear sala' }}
+  </button>
+  <p class="ayuda">Cada sala nueva se crea con sus 518 butacas (504 comunes y 14 accesibles).</p>
+</form>
+
+@if (error(); as e) {
+  <p class="error" role="alert">{{ e }}</p>
+}
+@if (cargando()) {
+  <p class="ayuda">Cargando…</p>
+}
+
+<div class="lista">
+  @for (s of service.salas(); track s.id) {
+    <article class="tarjeta fila">
+      <div>
+        <h3>{{ s.nombre }}</h3>
+        <p class="ayuda">{{ s.total_butacas }} butacas</p>
+      </div>
+      <div class="acciones">
+        <button type="button" class="boton boton-secundario" (click)="renombrar(s)">Renombrar</button>
+        <button type="button" class="boton boton-secundario" (click)="eliminar(s)">Eliminar</button>
+      </div>
+    </article>
+  } @empty {
+    @if (!cargando()) {
+      <p class="ayuda">Todavía no hay salas.</p>
+    }
+  }
+</div>

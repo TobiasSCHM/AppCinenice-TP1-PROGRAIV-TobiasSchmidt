@@ -1,0 +1,60 @@
+<a class="volver" routerLink="/">← Volver a la cartelera</a>
+
+@if (error(); as e) {
+  <p class="error" role="alert">{{ e }}</p>
+}
+@if (cargando()) {
+  <p class="ayuda">Cargando…</p>
+}
+
+@if (pelicula(); as p) {
+  <article class="ficha">
+    <img class="poster" [src]="p.imagen_url" [alt]="'Póster de ' + p.nombre" />
+    <div>
+      <h1>{{ p.nombre }}</h1>
+      <p class="meta">
+        {{ p.duracion_min | duracion }}
+        @if (p.restriccion_edad > 0) { · Apta para mayores de {{ p.restriccion_edad }} }
+        @else { · Apta para todo público }
+      </p>
+      <p class="generos">
+        @for (g of p.generos; track g.id) {
+          <span class="insignia">{{ g.nombre }}</span>
+        }
+      </p>
+      <p class="sinopsis">{{ p.sinopsis }}</p>
+    </div>
+  </article>
+
+  <section class="seccion">
+    <h2>Funciones</h2>
+    @for (dia of funcionesPorDia(); track dia.titulo) {
+      <div class="tarjeta dia">
+        <h3 class="dia-titulo">{{ dia.titulo }}</h3>
+        <ul class="lista-funciones">
+          @for (f of dia.funciones; track f.id) {
+            <!-- el miercoles cada fila pasa a ser un enlace al mapa de butacas -->
+            <li>
+              <span class="hora">{{ hora(f.inicio) }}</span>
+              <span>{{ f.formato }}</span>
+              <span>{{ f.idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }}</span>
+              <span>{{ f.sala?.nombre }}</span>
+              <span>{{ f.precio_base | precioArs }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    } @empty {
+      <p class="ayuda">Todavía no hay funciones programadas para esta película.</p>
+    }
+  </section>
+
+  <section class="seccion">
+    <h2>Reseñas</h2>
+    <p class="ayuda">Próximamente: calificaciones de quienes ya vieron la película.</p>
+  </section>
+} @else {
+  @if (!cargando() && !error()) {
+    <p>La película no existe.</p>
+  }
+}

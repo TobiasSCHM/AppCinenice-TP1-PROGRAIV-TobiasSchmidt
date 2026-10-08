@@ -1,0 +1,21 @@
+.volver { display: inline-block; margin-bottom: var(--espacio-4); font: 700 0.8rem var(--fuente-maquina); letter-spacing: 0.08em; text-transform: uppercase; }
+.ficha { display: grid; gap: var(--espacio-6); margin-bottom: var(--espacio-8); }
+.poster {
+  width: min(100%, 260px); aspect-ratio: 2 / 3; object-fit: cover; padding: 6px;
+  background: var(--negro-2); border: 2px solid var(--laton); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.55);
+}
+.meta { color: var(--color-texto-suave); font: 0.9rem var(--fuente-maquina); margin: 0 0 var(--espacio-2); }
+.generos { display: flex; flex-wrap: wrap; gap: var(--espacio-1); margin: 0 0 var(--espacio-4); }
+.sinopsis { max-width: 60ch; }
+.seccion { margin-bottom: var(--espacio-8); }
+
+.dia { margin-bottom: var(--espacio-3); }
+.dia-titulo { text-transform: capitalize; }
+.lista-funciones { list-style: none; margin: 0; padding: 0; }
+.lista-funciones li {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--espacio-2) var(--espacio-4);
+  padding: var(--espacio-2) 0; border-top: 1px dashed var(--color-borde);
+}
+.hora { font: 700 1.1rem var(--fuente-maquina); }
+
+@media (min-width: 700px) { .ficha { grid-template-columns: 260px 1fr; } }

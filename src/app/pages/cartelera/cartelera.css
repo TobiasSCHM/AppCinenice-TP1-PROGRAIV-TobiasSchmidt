@@ -1,0 +1,26 @@
+.filtros { display: grid; gap: var(--espacio-3); margin-bottom: var(--espacio-6); }
+.buscador { max-width: 420px; margin-bottom: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--espacio-2); }
+
+.grilla { display: grid; gap: var(--espacio-6) var(--espacio-4); grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.cartel { display: block; color: var(--color-texto); text-decoration: none; }
+.cartel h3 { margin: var(--espacio-2) 0 var(--espacio-1); }
+
+/* el poster va enmarcado como en la vitrina de un cine */
+.marco {
+  position: relative; padding: 6px; background: var(--negro-2);
+  border: 2px solid var(--laton); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.55);
+  transition: transform 0.15s;
+}
+.cartel:hover .marco, .cartel:focus-visible .marco { transform: translateY(-4px); border-color: var(--beige); }
+.marco img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background: var(--color-superficie-2); }
+
+.sello {
+  position: absolute; top: 14px; left: -8px; padding: 3px 10px;
+  background: var(--rojo); color: var(--beige-claro);
+  font: 700 0.68rem var(--fuente-maquina); letter-spacing: 0.08em; text-transform: uppercase;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+}
+.meta { margin: 0 0 var(--espacio-2); color: var(--color-texto-suave); font: 0.8rem var(--fuente-maquina); }
+.generos { display: flex; flex-wrap: wrap; gap: var(--espacio-1); margin: 0; }
+.vacio { grid-column: 1 / -1; text-align: center; padding: var(--espacio-8) 0; color: var(--color-texto-suave); }

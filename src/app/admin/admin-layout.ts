@@ -11,6 +11,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <h2>Panel</h2>
         <a routerLink="/admin" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
         <a routerLink="/admin/peliculas" routerLinkActive="activo">Películas</a>
+        <a routerLink="/admin/salas" routerLinkActive="activo">Salas</a>
       </aside>
       <section class="admin-contenido"><router-outlet /></section>
     </div>

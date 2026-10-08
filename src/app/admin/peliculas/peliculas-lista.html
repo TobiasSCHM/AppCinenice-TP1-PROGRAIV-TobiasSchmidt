@@ -1,0 +1,45 @@
+<div class="encabezado">
+  <h1>Películas</h1>
+  <a class="boton" routerLink="/admin/peliculas/nueva">Nueva película</a>
+</div>
+
+@if (error(); as e) {
+  <p class="error" role="alert">{{ e }}</p>
+}
+
+@if (cargando()) {
+  <p class="ayuda">Cargando…</p>
+}
+
+<div class="lista">
+  @for (p of service.peliculas(); track p.id) {
+    <article class="tarjeta fila">
+      <img [src]="p.imagen_url" [alt]="'Póster de ' + p.nombre" loading="lazy" />
+      <div class="datos">
+        <h3>{{ p.nombre }}</h3>
+        <p class="ayuda">
+          {{ p.duracion_min | duracion }}
+          @if (p.restriccion_edad > 0) {
+            · <span class="insignia" [class]="'insignia edad-' + p.restriccion_edad">+{{ p.restriccion_edad }}</span>
+          }
+        </p>
+        <p>
+          @for (g of p.generos; track g.id) {
+            <span class="insignia">{{ g.nombre }}</span>
+          }
+        </p>
+      </div>
+      <div class="acciones">
+        <button type="button" class="chip" [class.activo]="p.visible_portada" (click)="alternarVisibilidad(p)">
+          {{ p.visible_portada ? 'Visible en portada' : 'Oculta' }}
+        </button>
+        <a class="boton boton-secundario" [routerLink]="['/admin/peliculas', p.id, 'editar']">Editar</a>
+        <button type="button" class="boton boton-secundario" (click)="eliminar(p)">Eliminar</button>
+      </div>
+    </article>
+  } @empty {
+    @if (!cargando()) {
+      <p class="ayuda">Todavía no hay películas cargadas.</p>
+    }
+  }
+</div>

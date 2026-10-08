@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase.client';
-import type { Perfil, Rol } from './models/perfil.model';
+import type { DatosPerfil, Perfil, Rol } from './models/perfil.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -54,6 +54,45 @@ export class AuthService {
 
   loginConCorreo(email: string, password: string) {
     return supabase.auth.signInWithPassword({ email, password });
+  }
+
+  // registro con correo (rf-01). los 7 datos viajan como metadata y el trigger de la base crea el perfil.
+  // el rol no se envia: el trigger lo fija siempre en 'cliente'
+  registrar(email: string, password: string, datos: DatosPerfil) {
+    return supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { ...datos }, emailRedirectTo: window.location.origin },
+    });
+  }
+
+  // oauth (rf-03). supabase redirige al proveedor y vuelve a esta misma url con la sesion abierta
+  loginConProveedor(provider: 'google' | 'github') {
+    return supabase.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin } });
+  }
+
+  // completa los datos que el proveedor no entrega. la base solo permite editar estas columnas (ver grants en 003)
+  async completarPerfil(datos: DatosPerfil): Promise<void> {
+    const uid = this.session()?.user.id;
+    if (!uid) throw new Error('No hay sesión iniciada.');
+    const { error } = await supabase
+      .from('perfiles')
+      .update({ ...datos, perfil_completo: true })
+      .eq('id', uid);
+    if (error) throw error;
+    await this.cargarPerfil(uid);
+  }
+
+  // pantalla de inicio segun el rol (rf-02)
+  rutaInicio(): string {
+    switch (this.rol()) {
+      case 'admin':
+        return '/admin';
+      case 'empleado':
+        return '/empleado';
+      default:
+        return '/';
+    }
   }
 
   logout() {

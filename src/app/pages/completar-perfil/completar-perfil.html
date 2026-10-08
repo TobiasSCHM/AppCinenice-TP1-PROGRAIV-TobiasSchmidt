@@ -1,0 +1,61 @@
+<section class="tarjeta formulario-ancho">
+  <h2>Completá tu perfil</h2>
+  <p class="ayuda">Necesitamos unos datos más para terminar de crear tu cuenta.</p>
+
+  <form [formRoot]="formulario" (submit)="$event.preventDefault()">
+    <div class="grilla-form">
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" autocomplete="given-name" [formField]="formulario.nombre" />
+        <app-errores-campo [estado]="formulario.nombre()" />
+      </div>
+      <div class="campo">
+        <label for="apellido">Apellido</label>
+        <input id="apellido" autocomplete="family-name" [formField]="formulario.apellido" />
+        <app-errores-campo [estado]="formulario.apellido()" />
+      </div>
+      <div class="campo">
+        <label for="fecha">Fecha de nacimiento</label>
+        <input id="fecha" type="date" autocomplete="bday" [formField]="formulario.fecha_nacimiento" />
+        @if (borrador().fecha_nacimiento | edad; as e) {
+          <small class="ayuda">{{ e }} años</small>
+        }
+        <app-errores-campo [estado]="formulario.fecha_nacimiento()" />
+      </div>
+      <div class="campo">
+        <label for="vacaciones">Días de vacaciones por año</label>
+        <input id="vacaciones" type="number" inputmode="numeric" [formField]="formulario.dias_vacaciones" />
+        <app-errores-campo [estado]="formulario.dias_vacaciones()" />
+      </div>
+      <div class="campo">
+        <label for="sangre">Tipo de sangre</label>
+        <select id="sangre" [formField]="formulario.tipo_sangre">
+          <option value="">Elegir…</option>
+          @for (t of tiposSangre; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+        <app-errores-campo [estado]="formulario.tipo_sangre()" />
+      </div>
+      <div class="campo">
+        <label for="ojos">Color de ojos</label>
+        <select id="ojos" [formField]="formulario.color_ojos">
+          <option value="">Elegir…</option>
+          @for (c of coloresOjos; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+        <app-errores-campo [estado]="formulario.color_ojos()" />
+      </div>
+    </div>
+
+    @if (errorEnvio(); as e) {
+      <p class="error" role="alert">{{ e }}</p>
+    }
+    <div class="fila-acciones">
+      <button type="submit" class="boton" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar y continuar' }}
+      </button>
+    </div>
+  </form>
+</section>
