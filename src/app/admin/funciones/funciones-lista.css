@@ -1,0 +1,10 @@
+.encabezado { display: flex; align-items: center; justify-content: space-between; gap: var(--espacio-3); flex-wrap: wrap; }
+.dia { margin-bottom: var(--espacio-3); }
+.dia-titulo { text-transform: capitalize; }
+.lista-funciones { list-style: none; margin: 0; padding: 0; }
+.lista-funciones li {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--espacio-2) var(--espacio-4);
+  padding: var(--espacio-2) 0; border-top: 1px dashed var(--color-borde);
+}
+.hora { font: 700 1.1rem var(--fuente-maquina); }
+.pelicula { font-weight: 700; flex: 1 1 12ch; }

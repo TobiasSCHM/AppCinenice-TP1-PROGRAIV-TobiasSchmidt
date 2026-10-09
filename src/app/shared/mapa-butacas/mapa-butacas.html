@@ -1,0 +1,35 @@
+<div class="sala" role="group" aria-label="Mapa de butacas">
+  <div class="escenario">
+    <div class="pantalla" aria-hidden="true">Pantalla</div>
+
+    <div class="filas">
+      @for (fila of filas(); track fila.filaOrden) {
+        <div class="fila" [class.fila-accesible]="fila.tipo === 'accesible'">
+          <span class="nombre-fila" aria-hidden="true">{{ fila.fila }}</span>
+          @for (bloque of fila.bloques; track $index; let i = $index) {
+            <div class="bloque" [class.central]="i === 1" [class.lateral]="i !== 1">
+              @for (b of bloque; track b.id) {
+                <button type="button"
+                        [appHighlightButaca]="b.tipo"
+                        [estadoButaca]="estadoDe(b)"
+                        [attr.aria-label]="descripcion(b)"
+                        [attr.aria-pressed]="estadoDe(b) === 'seleccionada'"
+                        [title]="descripcion(b)"
+                        [disabled]="estadoDe(b) === 'ocupada'"
+                        (click)="elegir(b)"></button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <ul class="leyenda" aria-label="Referencias">
+    <li><span [appHighlightButaca]="'comun'"></span> Libre</li>
+    <li><span [appHighlightButaca]="'accesible'"></span> Accesible</li>
+    <li><span [appHighlightButaca]="'vip'"></span> VIP</li>
+    <li><span [appHighlightButaca]="'comun'" [estadoButaca]="'ocupada'"></span> Ocupada</li>
+    <li><span [appHighlightButaca]="'comun'" [estadoButaca]="'seleccionada'"></span> Tu selección</li>
+  </ul>
+</div>

@@ -1,0 +1,48 @@
+/* tamanos: la butaca crece con la pantalla pero nunca baja de 16px */
+:host {
+  display: block;
+  --tam: clamp(16px, 2.2vw, 24px);
+  --hueco: 3px;
+  --pasillo: calc(var(--tam) * 1.2);
+}
+
+.sala { overflow-x: auto; padding: var(--espacio-4) var(--espacio-2); }
+.escenario { width: max-content; margin: 0 auto; }
+
+.pantalla {
+  width: 60%; margin: 0 auto var(--espacio-6); padding-top: 6px; text-align: center;
+  font: 700 0.7rem var(--fuente-maquina); letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--color-texto-suave);
+  border-top: 5px solid var(--beige); border-radius: 50% 50% 0 0 / 16px 16px 0 0;
+}
+
+.filas { display: grid; gap: var(--hueco); }
+.fila { display: flex; align-items: center; gap: var(--pasillo); }
+.fila-accesible { margin: var(--espacio-2) 0; }
+.nombre-fila { flex: none; width: 3ch; text-align: right; font: 700 0.65rem var(--fuente-maquina); color: var(--color-texto-suave); }
+
+/* los bloques tienen ancho fijo: asi la fila accesible (menos butacas) queda centrada y alineada con las demas */
+.bloque { display: flex; justify-content: center; gap: var(--hueco); }
+.lateral { width: calc(4 * var(--tam) + 3 * var(--hueco)); }
+.central { width: calc(20 * var(--tam) + 19 * var(--hueco)); }
+
+/* butacas: la directiva solo pone las clases, el aspecto se define aca */
+.butaca {
+  display: inline-block; flex: none; width: var(--tam); height: var(--tam); padding: 0;
+  border: 1px solid var(--negro); border-radius: 4px 4px 2px 2px;
+  background: #5a4a3b; cursor: pointer; transition: transform 0.08s;
+}
+.butaca:hover:not(:disabled):not(.seleccionada) { transform: translateY(-2px); }
+.butaca:focus-visible { outline: 2px solid var(--beige-claro); outline-offset: 1px; }
+.butaca.accesible { background: var(--color-accesible); border: 2px solid var(--beige); }
+.butaca.vip { background: var(--color-vip); border-color: #f0d890; }
+.butaca.ocupada { background: var(--rojo-oscuro); opacity: 0.6; cursor: not-allowed; }
+.butaca.seleccionada { background: var(--beige-claro); border: 2px solid var(--rojo); }
+
+.leyenda {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: var(--espacio-2) var(--espacio-6);
+  margin: var(--espacio-4) 0 0; padding: 0; list-style: none;
+  font: 0.8rem var(--fuente-maquina); color: var(--color-texto-suave);
+}
+.leyenda li { display: flex; align-items: center; gap: var(--espacio-2); }
+.leyenda .butaca { width: 18px; height: 18px; cursor: default; }

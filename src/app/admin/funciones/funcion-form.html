@@ -1,0 +1,115 @@
+<h1>Programar funciones</h1>
+
+@if (cargando()) {
+  <p class="ayuda">Cargando…</p>
+}
+
+<form class="tarjeta" (submit)="$event.preventDefault(); guardar()">
+  <div class="campo">
+    <label for="pelicula">Película</label>
+    <select id="pelicula" (change)="elegirPelicula($any($event.target).value)">
+      <option value="">Elegir…</option>
+      @for (p of peliculasService.peliculas(); track p.id) {
+        <option [value]="p.id">{{ p.nombre }} ({{ p.duracion_min | duracion }})</option>
+      }
+    </select>
+  </div>
+
+  <div class="campo">
+    <span class="etiqueta">Días de la semana</span>
+    <div class="chips" role="group" aria-label="Días de la semana">
+      @for (d of dias; track d.n) {
+        <button type="button" class="chip" [class.activo]="diasElegidos().includes(d.n)"
+                [attr.aria-pressed]="diasElegidos().includes(d.n)" (click)="alternarDia(d.n)">{{ d.corto }}</button>
+      }
+    </div>
+  </div>
+
+  <div class="campo">
+    <span class="etiqueta">Hora de inicio</span>
+    <div class="chips" role="group" aria-label="Hora de inicio">
+      @for (h of horas; track h) {
+        <button type="button" class="chip" [class.activo]="hora() === h" [attr.aria-pressed]="hora() === h"
+                (click)="hora.set(h)">{{ h }}</button>
+      }
+    </div>
+  </div>
+
+  <div class="campo">
+    <span class="etiqueta">Durante cuántas semanas (desde hoy)</span>
+    <div class="chips" role="group" aria-label="Cantidad de semanas">
+      @for (s of opcionesSemanas; track s) {
+        <button type="button" class="chip" [class.activo]="semanas() === s" (click)="semanas.set(s)">
+          {{ s }} {{ s === 1 ? 'semana' : 'semanas' }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="doble">
+    <div class="campo">
+      <span class="etiqueta">Formato</span>
+      <div class="chips" role="group" aria-label="Formato">
+        @for (f of formatos; track f) {
+          <button type="button" class="chip" [class.activo]="formato() === f" (click)="formato.set(f)">{{ f }}</button>
+        }
+      </div>
+    </div>
+    <div class="campo">
+      <span class="etiqueta">Idioma</span>
+      <div class="chips" role="group" aria-label="Idioma">
+        @for (i of idiomas; track i.valor) {
+          <button type="button" class="chip" [class.activo]="idioma() === i.valor" (click)="idioma.set(i.valor)">
+            {{ i.etiqueta }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="campo precio">
+    <label for="precio">Precio base de la entrada ($)</label>
+    <input id="precio" inputmode="numeric" [value]="precio()" (input)="precio.set($any($event.target).value)" />
+  </div>
+
+  @if (intentado()) {
+    @for (e of erroresCampos(); track e) {
+      <p class="error">{{ e }}</p>
+    }
+  }
+
+  @if (vistaPrevia().length > 0) {
+    <section class="previa">
+      <h3>Se crearán {{ vistaPrevia().length }} {{ vistaPrevia().length === 1 ? 'función' : 'funciones' }}</h3>
+      <ul>
+        @for (f of vistaPrevia(); track f.iso) {
+          <li [class.sin-sala]="f.salaId === null">
+            <span class="fecha">{{ dia(f.iso) }}</span>
+            <span class="hora">{{ horaDe(f.iso) }}</span>
+            @if (f.salaNombre) {
+              <span>{{ f.salaNombre }}</span>
+            } @else {
+              <span>Sin sala libre</span>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  } @else if (peliculaId() !== null && diasElegidos().length > 0) {
+    <p class="ayuda">Todas las fechas elegidas ya pasaron.</p>
+  }
+
+  @if (errorSala(); as e) {
+    <p class="error" role="alert">{{ e }}</p>
+  }
+  @if (errorEnvio(); as e) {
+    <p class="error" role="alert">{{ e }}</p>
+  }
+
+  <div class="fila-acciones">
+    <button type="submit" class="boton" [disabled]="guardando() || errorSala() !== null">
+      {{ guardando() ? 'Creando…' : 'Crear funciones' }}
+    </button>
+    <a routerLink="/admin/funciones">Cancelar</a>
+  </div>
+</form>

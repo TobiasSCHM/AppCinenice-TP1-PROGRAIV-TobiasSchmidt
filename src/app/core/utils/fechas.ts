@@ -20,6 +20,22 @@ export function calcularEdad(nacimiento: Date, hoy: Date = new Date()): number {
   if (aunNoCumplio) edad--;
   return edad;
 }
+
+export function fechasDeRecurrencia(dias: number[], hora: string, semanas: number, ahora: Date = new Date()): Date[] {
+  const [anio, mes, dia] = claveDia(ahora.toISOString()).split('-').map(Number);
+  const resultado: Date[] = [];
+  for (let i = 0; i < semanas * 7; i++) {
+    // se trabaja al mediodia utc para que sumar dias nunca cambie de fecha por zona horaria
+    const d = new Date(Date.UTC(anio, mes - 1, dia + i, 12));
+    const iso = d.getUTCDay() === 0 ? 7 : d.getUTCDay(); // js: 0 = domingo
+    if (!dias.includes(iso)) continue;
+    const fecha = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+    const inicio = new Date(`${fecha}T${hora}:00-03:00`);
+    if (inicio.getTime() > ahora.getTime()) resultado.push(inicio);
+  }
+  return resultado;
+}
+
 // las funciones se guardan en timestamptz (utc) y se muestran siempre en hora argentina
 export const ZONA_HORARIA = 'America/Argentina/Buenos_Aires';
 

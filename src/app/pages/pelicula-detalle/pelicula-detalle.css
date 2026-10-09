@@ -18,4 +18,6 @@
 }
 .hora { font: 700 1.1rem var(--fuente-maquina); }
 
+.lista-funciones li .boton { margin-left: auto; }
+
 @media (min-width: 700px) { .ficha { grid-template-columns: 260px 1fr; } }

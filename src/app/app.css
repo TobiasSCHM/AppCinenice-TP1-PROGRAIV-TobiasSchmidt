@@ -7,9 +7,7 @@
   padding: var(--espacio-3) var(--espacio-4);
   color: var(--beige);
   /* pliegues verticales del terciopelo + degradado de luz */
-  background:
-    repeating-linear-gradient(90deg, rgba(0,0,0,.3) 0, rgba(255,255,255,.07) 12px, rgba(0,0,0,.3) 24px),
-    linear-gradient(180deg, var(--rojo-claro), var(--rojo) 55%, var(--rojo-oscuro));
+  background: #6d1017;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
 }
 /* festones colgando del borde inferior, como el cortinado de un teatro */
@@ -20,6 +18,9 @@
 }
 
 /* marquesina: letras art deco con marco de lamparitas (borde punteado) */
+.marca-grupo { display: flex; align-items: center; gap: var(--espacio-2); }
+.logo { display: flex; align-items: center; line-height: 0; }
+.logo img { height: 2.6rem; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5)); }
 .marca {
   font-family: var(--fuente-titulo); font-size: 1.5rem; letter-spacing: 0.12em;
   color: var(--beige-claro); text-decoration: none;

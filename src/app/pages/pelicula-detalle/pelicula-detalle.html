@@ -33,13 +33,13 @@
         <h3 class="dia-titulo">{{ dia.titulo }}</h3>
         <ul class="lista-funciones">
           @for (f of dia.funciones; track f.id) {
-            <!-- el miercoles cada fila pasa a ser un enlace al mapa de butacas -->
             <li>
               <span class="hora">{{ hora(f.inicio) }}</span>
               <span>{{ f.formato }}</span>
               <span>{{ f.idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }}</span>
               <span>{{ f.sala?.nombre }}</span>
               <span>{{ f.precio_base | precioArs }}</span>
+              <a class="boton" [routerLink]="['/funcion', f.id]">Elegir butacas</a>
             </li>
           }
         </ul>

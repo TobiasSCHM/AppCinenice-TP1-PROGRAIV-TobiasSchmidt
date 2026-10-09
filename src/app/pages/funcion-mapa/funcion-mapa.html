@@ -1,0 +1,55 @@
+<a class="volver" routerLink="/">← Cartelera</a>
+
+@if (error(); as e) {
+  <p class="error" role="alert">{{ e }}</p>
+}
+@if (cargando()) {
+  <p class="ayuda">Cargando…</p>
+}
+
+@if (funcion(); as f) {
+  <header class="cabecera">
+    <div>
+      <h1>{{ f.pelicula?.nombre }}</h1>
+      <p class="datos">
+        {{ dia(f.inicio) }} · {{ hora(f.inicio) }} · {{ f.sala?.nombre }} · {{ f.formato }} ·
+        {{ f.idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }} · {{ f.precio_base | precioArs }}
+      </p>
+      <a [routerLink]="['/pelicula', f.pelicula_id]">Ver detalle de la película</a>
+    </div>
+    <span class="estado" [class.activo]="enVivo()" role="status">
+      {{ enVivo() ? 'En vivo' : 'Conectando…' }}
+    </span>
+  </header>
+
+  <app-mapa-butacas
+    [butacas]="butacas()"
+    [ocupadas]="ocupadas()"
+    [seleccionadas]="seleccionadas()"
+    (alternar)="alternar($event)" />
+
+  <section class="tarjeta seleccion" aria-live="polite">
+    <h3>Tu selección</h3>
+
+    @if (seleccion().length === 0) {
+      <p class="ayuda">
+        Tocá las butacas libres para elegirlas. Tienen que estar seguidas, en la misma fila y sin un pasillo en el medio.
+      </p>
+    } @else {
+      <p>
+        <strong>{{ seleccion().length }}</strong>
+        {{ seleccion().length === 1 ? 'butaca' : 'butacas' }}: {{ textoSeleccion() }}
+      </p>
+      @if (motivoError(); as motivo) {
+        <p class="error" role="alert">{{ motivo }}</p>
+      } @else {
+        <p class="ok">Selección válida.</p>
+      }
+      <button type="button" class="boton boton-secundario" (click)="limpiar()">Limpiar selección</button>
+    }
+
+    @if (aviso(); as a) {
+      <p class="aviso" role="status">{{ a }}</p>
+    }
+  </section>
+}

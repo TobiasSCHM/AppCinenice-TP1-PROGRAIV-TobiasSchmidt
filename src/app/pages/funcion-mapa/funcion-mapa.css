@@ -1,0 +1,18 @@
+.volver { display: inline-block; margin-bottom: var(--espacio-4); font: 700 0.8rem var(--fuente-maquina); letter-spacing: 0.08em; text-transform: uppercase; }
+.cabecera { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--espacio-3); }
+.datos { margin: 0 0 var(--espacio-2); color: var(--color-texto-suave); font: 0.9rem var(--fuente-maquina); }
+
+/* indicador de conexion en vivo */
+.estado {
+  padding: 2px var(--espacio-3); border: 1px solid var(--color-borde); border-radius: var(--radio);
+  font: 700 0.72rem var(--fuente-maquina); letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--color-texto-suave);
+}
+.estado.activo { background: var(--rojo); border-color: var(--rojo-oscuro); color: var(--beige-claro); }
+
+.seleccion { margin-top: var(--espacio-6); max-width: 560px; }
+.ok { margin: 0 0 var(--espacio-3); color: #2f6b3a; font-weight: 700; }
+.aviso {
+  margin: var(--espacio-3) 0 0; padding: var(--espacio-2) var(--espacio-3);
+  border-left: 3px solid var(--rojo); background: var(--color-superficie-2);
+}
