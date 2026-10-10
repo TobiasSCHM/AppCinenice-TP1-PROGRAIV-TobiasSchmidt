@@ -1,0 +1,76 @@
+<h1>{{ esEdicion() ? 'Editar producto' : 'Nuevo producto' }}</h1>
+
+@if (cargandoProducto()) {
+  <p class="ayuda">Cargando producto…</p>
+}
+
+<form class="tarjeta" [formRoot]="formulario" (submit)="$event.preventDefault()">
+  <div class="contenedor">
+    <div class="columna-imagen">
+      <div class="imagen">
+        @if (imagenMostrada(); as src) {
+          <img [src]="src" alt="Vista previa de la imagen" />
+        } @else {
+          <span class="ayuda">Sin imagen</span>
+        }
+      </div>
+      <label class="boton boton-secundario" for="imagen">Elegir imagen</label>
+      <input id="imagen" class="oculto" type="file" accept="image/*" (change)="alElegirImagen($event)" />
+      <p class="ayuda">Opcional. Hasta 3 MB.</p>
+      @if (errorImagen(); as e) {
+        <p class="error">{{ e }}</p>
+      }
+    </div>
+
+    <div class="columna-datos">
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" [formField]="formulario.nombre" />
+        <app-errores-campo [estado]="formulario.nombre()" />
+      </div>
+
+      <div class="campo">
+        <label for="descripcion">Descripción (opcional)</label>
+        <textarea id="descripcion" rows="3" [formField]="formulario.descripcion"></textarea>
+        <app-errores-campo [estado]="formulario.descripcion()" />
+      </div>
+
+      <div class="campo precio">
+        <label for="precio">Precio ($)</label>
+        <input id="precio" type="number" step="0.01" inputmode="decimal" [formField]="formulario.precio" />
+        <app-errores-campo [estado]="formulario.precio()" />
+      </div>
+
+      <div class="campo">
+        <span class="etiqueta">Categoría</span>
+        <div class="chips" role="group" aria-label="Categoría">
+          @for (c of categorias(); track c.id) {
+            <button type="button" class="chip" [class.activo]="categoriaId() === c.id"
+                    [attr.aria-pressed]="categoriaId() === c.id" (click)="elegirCategoria(c.id)">{{ c.nombre }}</button>
+          } @empty {
+            <span class="ayuda">No hay categorías. Creá una desde la lista del Candy Bar.</span>
+          }
+        </div>
+        @if (errorCategoria(); as e) {
+          <p class="error">{{ e }}</p>
+        }
+      </div>
+
+      <label class="check">
+        <input type="checkbox" [formField]="formulario.activo" />
+        Disponible para la venta
+      </label>
+    </div>
+  </div>
+
+  @if (errorEnvio(); as e) {
+    <p class="error" role="alert">{{ e }}</p>
+  }
+
+  <div class="fila-acciones">
+    <button type="submit" class="boton" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando…' : 'Guardar producto' }}
+    </button>
+    <a routerLink="/admin/productos">Cancelar</a>
+  </div>
+</form>

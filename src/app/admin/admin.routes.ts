@@ -6,6 +6,9 @@ import { PeliculaForm } from './peliculas/pelicula-form';
 import { SalasLista } from './salas/salas-lista';
 import { FuncionesLista } from './funciones/funciones-lista';
 import { FuncionForm } from './funciones/funcion-form';
+import { ProductosLista } from './productos/productos-lista';
+import { ProductoForm } from './productos/producto-form';
+import { ConfiguracionLista } from './configuracion/configuracion-lista';
 
 // modulo lazy: solo se descarga si el rol es admin (ver canmatch en app.routes.ts)
 export const ADMIN_ROUTES: Routes = [
@@ -20,6 +23,10 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'salas', component: SalasLista },
       { path: 'funciones', component: FuncionesLista },
       { path: 'funciones/nueva', component: FuncionForm },
+      { path: 'productos', component: ProductosLista },
+      { path: 'productos/nuevo', component: ProductoForm },
+      { path: 'productos/:id/editar', component: ProductoForm },
+      { path: 'configuracion', component: ConfiguracionLista },
     ],
   },
 ];

@@ -1,0 +1,47 @@
+@let d = desglose();
+
+<section class="tarjeta resumen">
+  <h2>Resumen de tu compra</h2>
+
+  @if (hayVip()) {
+    <div class="aviso-vip" role="alert">
+      <strong>Tu compra incluye {{ d.cantidadVip }} {{ d.cantidadVip === 1 ? 'butaca VIP' : 'butacas VIP' }}.</strong>
+      Las filas R, S y T son VIP y tienen un recargo del {{ recargoPct() }} % sobre el precio de la entrada.
+      Revisá el total antes de pagar.
+    </div>
+  }
+
+  <ul class="lineas">
+    @for (l of d.lineas; track l.butacaId) {
+      <li>
+        <span class="nombre">{{ l.etiqueta }}</span>
+        <span class="insignia" [class.vip]="l.tipo === 'vip'">{{ nombreTipo(l.tipo) }}</span>
+        <span class="precio">{{ l.total | precioArs }}</span>
+        @if (l.recargo > 0) {
+          <small class="detalle">incluye {{ l.recargo | precioArs }} de recargo VIP</small>
+        }
+      </li>
+    }
+  </ul>
+
+  <dl class="totales">
+    <div>
+      <dt>Subtotal de entradas</dt>
+      <dd>{{ d.subtotal | precioArs }}</dd>
+    </div>
+    @if (hayVip()) {
+      <div>
+        <dt>Recargo VIP</dt>
+        <dd>{{ d.recargoVip | precioArs }}</dd>
+      </div>
+    }
+    <div class="total">
+      <dt>Total</dt>
+      <dd>{{ d.total | precioArs }}</dd>
+    </div>
+  </dl>
+
+  <div class="fila-acciones">
+    <button type="button" class="boton boton-secundario" (click)="volver.emit()">Cambiar butacas</button>
+  </div>
+</section>

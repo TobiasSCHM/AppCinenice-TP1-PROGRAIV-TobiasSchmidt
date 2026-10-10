@@ -1,0 +1,39 @@
+<h1>Configuración</h1>
+<p class="ayuda">
+  Parámetros del negocio. Los cambios se aplican enseguida y quedan registrados en el log de actividad.
+</p>
+
+@if (error(); as e) {
+  <p class="error" role="alert">{{ e }}</p>
+}
+@if (confirmacion(); as c) {
+  <p class="confirmacion" role="status">{{ c }}</p>
+}
+@if (cargando()) {
+  <p class="ayuda">Cargando…</p>
+}
+
+<div class="lista">
+  @for (p of service.parametros(); track p.clave) {
+    <article class="tarjeta fila">
+      <div class="texto">
+        <h3>{{ meta(p.clave).etiqueta }}</h3>
+        <p class="ayuda">{{ p.descripcion }}</p>
+      </div>
+      <div class="control">
+        <input inputmode="decimal" [attr.aria-label]="meta(p.clave).etiqueta"
+               [value]="borradores()[p.clave]"
+               (input)="editar(p.clave, $any($event.target).value)"
+               (keydown.enter)="guardar(p)" />
+        <span class="unidad">{{ meta(p.clave).unidad }}</span>
+        <button type="button" class="boton" [disabled]="!hayCambios(p) || guardando() === p.clave"
+                (click)="guardar(p)">
+          {{ guardando() === p.clave ? 'Guardando…' : 'Guardar' }}
+        </button>
+      </div>
+      @if (errores()[p.clave]; as mensaje) {
+        <p class="error" role="alert">{{ mensaje }}</p>
+      }
+    </article>
+  }
+</div>

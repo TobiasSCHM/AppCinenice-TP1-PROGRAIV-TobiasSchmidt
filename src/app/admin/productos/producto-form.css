@@ -1,0 +1,14 @@
+.contenedor { display: grid; gap: var(--espacio-4); }
+.columna-imagen { display: flex; flex-direction: column; gap: var(--espacio-2); align-items: flex-start; }
+.imagen {
+  width: 160px; height: 160px; border-radius: var(--radio); overflow: hidden;
+  background: var(--color-superficie-2); border: 1px dashed var(--color-borde);
+  display: flex; align-items: center; justify-content: center;
+}
+.imagen img { width: 100%; height: 100%; object-fit: cover; }
+.oculto { display: none; }
+.etiqueta { font: 700 0.72rem var(--fuente-maquina); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-texto-suave); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--espacio-2); }
+.precio { max-width: 220px; }
+.check { display: flex; align-items: center; gap: var(--espacio-2); margin: var(--espacio-3) 0; }
+@media (min-width: 700px) { .contenedor { grid-template-columns: 200px 1fr; } }

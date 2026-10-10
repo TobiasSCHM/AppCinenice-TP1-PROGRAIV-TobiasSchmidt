@@ -4,21 +4,26 @@ import { FuncionesService } from '../../core/funciones.service';
 import { ButacasService } from '../../core/butacas.service';
 import { OcupacionService } from '../../core/ocupacion.service';
 import type { EstadoCanal } from '../../core/ocupacion.service';
+import { ConfiguracionService } from '../../core/configuracion.service';
 import { MapaButacas } from '../../shared/mapa-butacas/mapa-butacas';
+import { ResumenCompra } from '../../shared/resumen-compra/resumen-compra';
 import { PrecioArsPipe } from '../../core/pipes/precio-ars.pipe';
 import { armarFilas } from '../../core/utils/mapa-sala';
+import { calcularPrecios } from '../../core/utils/precios';
 import { textoDia, textoHora } from '../../core/utils/fechas';
 import { mensajeError } from '../../core/utils/errores';
 import { validarContiguas } from '../../core/validators/butacas-contiguas';
 import type { Butaca, CambioOcupacion } from '../../core/models/butaca.model';
 import type { FuncionAdmin } from '../../core/models/funcion.model';
 
-// eleccion de butacas de una funcion con ocupacion en tiempo real (rf-14, rf-18, rf-21, rnf-12).
-// la pagina orquesta: carga datos, escucha realtime y guarda el estado. el dibujo lo hace MapaButacas.
-// el boton para continuar con la compra se agrega el dia 6
+type Paso = 'elegir' | 'resumen';
+
+// eleccion de butacas de una funcion con ocupacion en tiempo real y resumen previo al pago
+// (rf-14, rf-18, rf-20, rf-21, rnf-12). la pagina orquesta: carga datos, escucha realtime y guarda el estado.
+// el dibujo lo hace MapaButacas y el resumen ResumenCompra. el boton de pago llega con rf-22 y rf-23
 @Component({
   selector: 'app-funcion-mapa',
-  imports: [RouterLink, MapaButacas, PrecioArsPipe],
+  imports: [RouterLink, MapaButacas, ResumenCompra, PrecioArsPipe],
   templateUrl: './funcion-mapa.html',
   styleUrl: './funcion-mapa.css',
 })
@@ -26,6 +31,7 @@ export class FuncionMapa {
   private readonly funcionesService = inject(FuncionesService);
   private readonly butacasService = inject(ButacasService);
   private readonly ocupacionService = inject(OcupacionService);
+  private readonly configuracion = inject(ConfiguracionService);
 
   // llega desde la ruta /funcion/:id (withComponentInputBinding)
   readonly id = input.required<string>();
@@ -36,6 +42,9 @@ export class FuncionMapa {
   // los conjuntos se reemplazan por uno nuevo en cada cambio: asi los signals detectan la modificacion
   protected readonly ocupadas = signal<ReadonlySet<number>>(new Set());
   protected readonly seleccionadas = signal<ReadonlySet<number>>(new Set());
+
+  protected readonly paso = signal<Paso>('elegir');
+  protected readonly recargoVipPct = signal(0);
 
   protected readonly cargando = signal(true);
   protected readonly enVivo = signal(false);
@@ -65,6 +74,22 @@ export class FuncionMapa {
     const v = this.validacion();
     return v.valida ? null : v.motivo;
   });
+
+  // una funcion que ya empezo no admite compras
+  protected readonly yaEmpezo = computed(() => {
+    const f = this.funcion();
+    return f !== null && Date.parse(f.inicio) <= Date.now();
+  });
+
+  // el paso al resumen y al pago se bloquea si la seleccion no es valida (rf-21)
+  protected readonly puedeContinuar = computed(
+    () => this.seleccion().length > 0 && this.validacion().valida && !this.yaEmpezo(),
+  );
+
+  // precio estimado (rf-20, rn-17). el servidor lo vuelve a calcular al confirmar la compra
+  protected readonly desglose = computed(() =>
+    calcularPrecios(this.seleccion(), this.etiquetaDe(), this.funcion()?.precio_base ?? 0, this.recargoVipPct()),
+  );
 
   // se exponen a la plantilla
   protected readonly dia = textoDia;
@@ -108,11 +133,23 @@ export class FuncionMapa {
     this.seleccionadas.set(new Set());
   }
 
+  // paso al resumen: solo si el validador lo permite
+  protected continuar(): void {
+    if (!this.puedeContinuar()) return;
+    this.aviso.set(null);
+    this.paso.set('resumen');
+  }
+
+  protected volverAElegir(): void {
+    this.paso.set('elegir');
+  }
+
   private reiniciar(): void {
     this.funcion.set(null);
     this.butacas.set([]);
     this.ocupadas.set(new Set());
     this.seleccionadas.set(new Set());
+    this.paso.set('elegir');
     this.error.set(null);
     this.aviso.set(null);
     this.enVivo.set(false);
@@ -127,14 +164,16 @@ export class FuncionMapa {
         this.error.set('La función no existe.');
         return;
       }
-      const [butacas, ocupadas] = await Promise.all([
+      const [butacas, ocupadas, recargo] = await Promise.all([
         this.butacasService.deSala(funcion.sala_id),
         this.ocupacionService.cargar(funcionId),
+        this.configuracion.valorDe('recargo_vip_pct'),
       ]);
       if (this.funcionId() !== funcionId) return;
       this.funcion.set(funcion);
       this.butacas.set(butacas);
       this.ocupadas.set(new Set(ocupadas));
+      this.recargoVipPct.set(recargo);
     } catch (e) {
       this.error.set(`No se pudo cargar la función: ${mensajeError(e)}`);
     } finally {
@@ -173,7 +212,8 @@ export class FuncionMapa {
     }
   }
 
-  // si alguien ocupo una butaca que tenias elegida, se te quita y se te avisa (flujo alternativo del documento)
+  // si alguien ocupo una butaca que tenias elegida, se te quita y se te avisa (flujo alternativo del documento).
+  // si estabas en el resumen se vuelve al mapa: tu seleccion cambio y el total ya no corresponde
   private quitarSiEstabaElegida(butacaId: number): void {
     if (!this.seleccionadas().has(butacaId)) return;
     this.seleccionadas.update((actual) => {
@@ -183,5 +223,6 @@ export class FuncionMapa {
     });
     const nombre = this.etiquetaDe().get(butacaId) ?? 'elegida';
     this.aviso.set(`La butaca ${nombre} acaba de ser ocupada por otra compra. La sacamos de tu selección.`);
+    this.paso.set('elegir');
   }
 }

@@ -1,0 +1,13 @@
+.lista { display: grid; gap: var(--espacio-3); margin-top: var(--espacio-4); }
+.fila { display: grid; gap: var(--espacio-3); }
+.texto h3, .texto p { margin: 0; }
+.control { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); }
+.control input {
+  width: 8rem; padding: var(--espacio-2) var(--espacio-3);
+  background: var(--color-fondo); color: var(--color-texto);
+  border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit;
+}
+.control input:focus { outline: 2px solid var(--rojo); outline-offset: 1px; }
+.unidad { color: var(--color-texto-suave); font: 0.85rem var(--fuente-maquina); min-width: 6ch; }
+.confirmacion { color: var(--color-exito); font-weight: 700; }
+@media (min-width: 700px) { .fila { grid-template-columns: 1fr auto; align-items: center; } .fila .error { grid-column: 1 / -1; } }

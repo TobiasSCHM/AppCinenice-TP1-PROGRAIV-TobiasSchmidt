@@ -12,6 +12,7 @@
 
 .seleccion { margin-top: var(--espacio-6); max-width: 560px; }
 .ok { margin: 0 0 var(--espacio-3); color: #2f6b3a; font-weight: 700; }
+.acciones { display: flex; flex-wrap: wrap; gap: var(--espacio-2); margin-top: var(--espacio-3); }
 .aviso {
   margin: var(--espacio-3) 0 0; padding: var(--espacio-2) var(--espacio-3);
   border-left: 3px solid var(--rojo); background: var(--color-superficie-2);

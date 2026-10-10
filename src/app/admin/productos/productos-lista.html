@@ -1,0 +1,65 @@
+<div class="encabezado">
+  <h1>Candy Bar</h1>
+  <a class="boton" routerLink="/admin/productos/nuevo">Nuevo producto</a>
+</div>
+
+@if (error(); as e) {
+  <p class="error" role="alert">{{ e }}</p>
+}
+@if (cargando()) {
+  <p class="ayuda">Cargando…</p>
+}
+
+<section class="tarjeta categorias">
+  <h3>Categorías</h3>
+  <ul class="lista-categorias">
+    @for (c of service.categorias(); track c.id) {
+      <li>
+        <span class="nombre">{{ c.nombre }}</span>
+        <button type="button" class="chip" (click)="renombrarCategoria(c)">Renombrar</button>
+        <button type="button" class="chip" (click)="eliminarCategoria(c)">Eliminar</button>
+      </li>
+    } @empty {
+      @if (!cargando()) {
+        <li class="ayuda">Todavía no hay categorías. Creá una para poder cargar productos.</li>
+      }
+    }
+  </ul>
+  <div class="nueva">
+    <input placeholder="Nueva categoría" aria-label="Nueva categoría"
+           [value]="nuevaCategoria()" (input)="nuevaCategoria.set($any($event.target).value)"
+           (keydown.enter)="agregarCategoria(); $event.preventDefault()" />
+    <button type="button" class="boton boton-secundario" (click)="agregarCategoria()">Agregar</button>
+  </div>
+</section>
+
+@for (g of grupos(); track g.categoria.id) {
+  <section class="grupo">
+    <h2>{{ g.categoria.nombre }}</h2>
+    @for (p of g.productos; track p.id) {
+      <article class="tarjeta producto">
+        @if (p.imagen_url) {
+          <img [src]="p.imagen_url" [alt]="p.nombre" loading="lazy" />
+        } @else {
+          <div class="sin-imagen" aria-hidden="true">Sin imagen</div>
+        }
+        <div class="datos">
+          <h3>{{ p.nombre }}</h3>
+          @if (p.descripcion) {
+            <p class="ayuda">{{ p.descripcion }}</p>
+          }
+          <p class="precio">{{ p.precio | precioArs }}</p>
+        </div>
+        <div class="acciones">
+          <button type="button" class="chip" [class.activo]="p.activo" (click)="alternarActivo(p)">
+            {{ p.activo ? 'Activo' : 'Inactivo' }}
+          </button>
+          <a class="boton boton-secundario" [routerLink]="['/admin/productos', p.id, 'editar']">Editar</a>
+          <button type="button" class="boton boton-secundario" (click)="eliminarProducto(p)">Eliminar</button>
+        </div>
+      </article>
+    } @empty {
+      <p class="ayuda">Sin productos en esta categoría.</p>
+    }
+  </section>
+}
