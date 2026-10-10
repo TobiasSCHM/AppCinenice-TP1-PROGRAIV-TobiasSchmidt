@@ -1,0 +1,15 @@
+:host { display: block; }
+.candy h4 {
+  margin: var(--espacio-4) 0 var(--espacio-2); font: 700 0.75rem var(--fuente-maquina);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-texto-suave);
+}
+.lista { list-style: none; margin: 0; padding: 0; }
+.lista li {
+  display: grid; grid-template-columns: 48px 1fr auto; gap: var(--espacio-3); align-items: center;
+  padding: var(--espacio-2) 0; border-top: 1px dashed var(--color-borde);
+}
+.lista img, .sin-imagen { width: 48px; height: 48px; object-fit: cover; border-radius: var(--radio); background: var(--color-superficie-2); }
+.datos { display: flex; flex-direction: column; gap: 2px; }
+.precio { font: 700 0.9rem var(--fuente-maquina); }
+.cantidad { display: flex; align-items: center; gap: var(--espacio-2); }
+.numero { min-width: 2ch; text-align: center; font: 700 1rem var(--fuente-maquina); }

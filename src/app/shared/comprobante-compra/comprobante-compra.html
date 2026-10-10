@@ -1,0 +1,52 @@
+@let c = comprobante;
+
+<section class="tarjeta comprobante" aria-live="polite">
+  <h2>¡Compra confirmada!</h2>
+
+  <p class="etiqueta">Código de tu entrada</p>
+  <p class="codigo">{{ c.qr_codigo }}</p>
+  <p class="ayuda">Guardá este código: es tu entrada. Con él ingresás a la sala y retirás tus productos.</p>
+
+  <h3>{{ c.funcion.pelicula }}</h3>
+  <p class="datos">
+    {{ dia(c.funcion.inicio) }} · {{ hora(c.funcion.inicio) }} · {{ c.funcion.sala }} · {{ c.funcion.formato }} ·
+    {{ c.funcion.idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }}
+  </p>
+
+  @if (c.funcion.restriccion_edad > 0) {
+    <div class="aviso-adulto" role="note">
+      Esta película tiene restricción de edad (+{{ c.funcion.restriccion_edad }}). Debe asistir un adulto.
+    </div>
+  }
+
+  <ul class="lineas">
+    @for (b of c.butacas; track b.id) {
+      <li>
+        <span>Butaca {{ b.etiqueta }}{{ b.tipo === 'vip' ? ' (VIP)' : '' }}</span>
+        <span>{{ b.precio | precioArs }}</span>
+      </li>
+    }
+    @for (p of c.productos; track p.nombre) {
+      <li>
+        <span>{{ p.cantidad }} × {{ p.nombre }}</span>
+        <span>{{ p.cantidad * p.precio_unitario | precioArs }}</span>
+      </li>
+    }
+  </ul>
+
+  <dl class="totales">
+    @if (c.descuento > 0) {
+      <div><dt>Descuento de primera compra</dt><dd>− {{ c.descuento | precioArs }}</dd></div>
+    }
+    <div class="total"><dt>Total pagado</dt><dd>{{ c.total_pagado | precioArs }}</dd></div>
+  </dl>
+
+  <p class="datos">Medio de pago: {{ etiquetaMedio(c.medio_pago) }}</p>
+  @if (c.puntos_ganados > 0) {
+    <p class="puntos">Sumaste <strong>{{ c.puntos_ganados }}</strong> puntos.</p>
+  }
+
+  <div class="fila-acciones">
+    <button type="button" class="boton boton-secundario" (click)="nuevaCompra.emit()">Comprar otra entrada</button>
+  </div>
+</section>

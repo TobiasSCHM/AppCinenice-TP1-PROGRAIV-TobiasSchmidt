@@ -69,12 +69,12 @@ export class FuncionesService {
     this.proximas.update((lista) => lista.filter((f) => f.id !== id));
   }
 
-  // una funcion con el nombre de su pelicula y de su sala (pantalla del mapa de butacas)
+  // una funcion con el nombre y la restriccion de edad de su pelicula y el nombre de su sala (pantalla del mapa de butacas)
   async obtener(id: number): Promise<FuncionAdmin | null> {
     const { data, error } = await supabase
       .from('funciones')
       .select(
-        'id, pelicula_id, sala_id, inicio, fin, ocupada_hasta, formato, idioma, precio_base, pelicula:peliculas(nombre), sala:salas(nombre)',
+        'id, pelicula_id, sala_id, inicio, fin, ocupada_hasta, formato, idioma, precio_base, pelicula:peliculas(nombre, restriccion_edad), sala:salas(nombre)',
       )
       .eq('id', id)
       .maybeSingle();

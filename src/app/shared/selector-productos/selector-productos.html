@@ -1,0 +1,35 @@
+<section class="tarjeta candy">
+  <h3>Candy Bar</h3>
+  <p class="ayuda">Sumá productos a tu compra. Es opcional.</p>
+
+  @for (g of grupos(); track g.categoria) {
+    <h4>{{ g.categoria }}</h4>
+    <ul class="lista">
+      @for (p of g.productos; track p.id) {
+        <li>
+          @if (p.imagen_url) {
+            <img [src]="p.imagen_url" [alt]="p.nombre" loading="lazy" />
+          } @else {
+            <span class="sin-imagen" aria-hidden="true"></span>
+          }
+          <div class="datos">
+            <strong>{{ p.nombre }}</strong>
+            @if (p.descripcion) {
+              <small class="ayuda">{{ p.descripcion }}</small>
+            }
+            <span class="precio">{{ p.precio | precioArs }}</span>
+          </div>
+          <div class="cantidad">
+            <button type="button" class="chip" [disabled]="cantidadDe(p) === 0"
+                    [attr.aria-label]="'Quitar ' + p.nombre" (click)="cambiar(p, -1)">−</button>
+            <span class="numero" aria-live="polite">{{ cantidadDe(p) }}</span>
+            <button type="button" class="chip" [attr.aria-label]="'Agregar ' + p.nombre"
+                    (click)="cambiar(p, 1)">+</button>
+          </div>
+        </li>
+      }
+    </ul>
+  } @empty {
+    <p class="ayuda">Por ahora no hay productos disponibles.</p>
+  }
+</section>

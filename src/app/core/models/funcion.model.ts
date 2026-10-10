@@ -12,12 +12,12 @@ export interface Funcion {
   sala: { nombre: string } | null;
 }
 
-// version completa para el admin: suma la sala, el rango ocupado y el nombre de la pelicula
+// version completa para el admin: suma la sala, el rango ocupado y la pelicula (nombre y restriccion de edad)
 export interface FuncionAdmin extends Funcion {
   sala_id: number;
   fin: string;
   ocupada_hasta: string; // fin + margen de 30 minutos
-  pelicula: { nombre: string } | null;
+  pelicula: { nombre: string; restriccion_edad?: number } | null;
 }
 
 // lo que se envia a la rpc crear_funciones_recurrentes

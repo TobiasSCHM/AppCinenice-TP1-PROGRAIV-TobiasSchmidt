@@ -1,0 +1,80 @@
+<form class="tarjeta pago" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+  <h3>Pago</h3>
+  <p class="ayuda">
+    Pago simulado: no se cobra nada ni se guarda ningún dato de tarjeta. Para probar, usá cualquier número de 16 dígitos.
+  </p>
+
+  <fieldset class="medios">
+    <legend>Medio de pago</legend>
+    <label><input type="radio" formControlName="medio" value="tarjeta_credito" /> Tarjeta de crédito</label>
+    <label><input type="radio" formControlName="medio" value="tarjeta_debito" /> Tarjeta de débito</label>
+    <label><input type="radio" formControlName="medio" value="transferencia" /> Transferencia</label>
+  </fieldset>
+
+  @switch (medio()) {
+    @case ('transferencia') {
+      <p class="ayuda">Transferencia simulada: la compra se confirma al instante.</p>
+    }
+    @default {
+      <div class="grilla-form">
+        <div class="campo">
+          <label for="titular">Titular de la tarjeta</label>
+          <input id="titular" formControlName="titular" autocomplete="cc-name" />
+          @if (invalido('titular')) {
+            <p class="error">Ingresá el nombre del titular (mínimo 3 caracteres).</p>
+          }
+        </div>
+        <div class="campo">
+          <label for="numero">Número de tarjeta</label>
+          <input id="numero" formControlName="numero" inputmode="numeric" autocomplete="cc-number"
+                 placeholder="1234 5678 9012 3456" />
+          @if (invalido('numero')) {
+            <p class="error">Ingresá los 16 dígitos de la tarjeta.</p>
+          }
+        </div>
+        <div class="campo">
+          <label for="vencimiento">Vencimiento (MM/AA)</label>
+          <input id="vencimiento" formControlName="vencimiento" autocomplete="cc-exp" placeholder="08/28" />
+          @if (invalido('vencimiento')) {
+            <p class="error">Usá el formato MM/AA, por ejemplo 08/28.</p>
+          }
+        </div>
+        <div class="campo">
+          <label for="cvv">Código de seguridad</label>
+          <input id="cvv" formControlName="cvv" inputmode="numeric" autocomplete="cc-csc" />
+          @if (invalido('cvv')) {
+            <p class="error">Ingresá 3 o 4 dígitos.</p>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  @if (necesitaFecha) {
+    <div class="campo">
+      <label for="fecha">Fecha de nacimiento (la película tiene restricción de edad)</label>
+      <input id="fecha" type="date" formControlName="fechaNacimiento" autocomplete="bday" />
+      @if (fechaEfectiva | edad; as e) {
+        <small class="ayuda">{{ e }} años</small>
+      }
+      @if (invalido('fechaNacimiento')) {
+        <p class="error">{{ mensajeFecha() }}</p>
+      }
+    </div>
+  }
+
+  <div class="fila-acciones">
+    <button type="submit" class="boton"
+            [appRestrictEdad]="restriccion" [fechaNacimiento]="fechaEfectiva" #edad="appRestrictEdad"
+            [disabled]="pagando || edad.restringido()">
+      {{ pagando ? 'Procesando pago…' : 'Pagar ' + (total | precioArs) }}
+    </button>
+  </div>
+
+  @if (edad.motivo(); as motivo) {
+    <p class="error" role="alert">{{ motivo }}</p>
+  }
+  @if (errorPago) {
+    <p class="error" role="alert">{{ errorPago }}</p>
+  }
+</form>

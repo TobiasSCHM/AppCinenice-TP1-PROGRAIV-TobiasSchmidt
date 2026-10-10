@@ -1,37 +1,51 @@
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../core/auth.service';
 import { FuncionesService } from '../../core/funciones.service';
 import { ButacasService } from '../../core/butacas.service';
 import { OcupacionService } from '../../core/ocupacion.service';
 import type { EstadoCanal } from '../../core/ocupacion.service';
 import { ConfiguracionService } from '../../core/configuracion.service';
+import { ProductosService } from '../../core/productos.service';
+import { ComprasService, esConflictoDeButacas } from '../../core/compras.service';
 import { MapaButacas } from '../../shared/mapa-butacas/mapa-butacas';
 import { ResumenCompra } from '../../shared/resumen-compra/resumen-compra';
+import { SelectorProductos } from '../../shared/selector-productos/selector-productos';
+import { FormularioPago } from '../../shared/formulario-pago/formulario-pago';
+import type { DatosPago } from '../../shared/formulario-pago/formulario-pago';
+import { ComprobanteCompra } from '../../shared/comprobante-compra/comprobante-compra';
 import { PrecioArsPipe } from '../../core/pipes/precio-ars.pipe';
 import { armarFilas } from '../../core/utils/mapa-sala';
-import { calcularPrecios } from '../../core/utils/precios';
+import { calcularPrecios, calcularTotales } from '../../core/utils/precios';
+import type { ProductoElegido } from '../../core/utils/precios';
 import { textoDia, textoHora } from '../../core/utils/fechas';
 import { mensajeError } from '../../core/utils/errores';
 import { validarContiguas } from '../../core/validators/butacas-contiguas';
 import type { Butaca, CambioOcupacion } from '../../core/models/butaca.model';
+import type { Comprobante } from '../../core/models/compra.model';
 import type { FuncionAdmin } from '../../core/models/funcion.model';
 
-type Paso = 'elegir' | 'resumen';
+type Paso = 'elegir' | 'resumen' | 'confirmada';
 
-// eleccion de butacas de una funcion con ocupacion en tiempo real y resumen previo al pago
-// (rf-14, rf-18, rf-20, rf-21, rnf-12). la pagina orquesta: carga datos, escucha realtime y guarda el estado.
-// el dibujo lo hace MapaButacas y el resumen ResumenCompra. el boton de pago llega con rf-22 y rf-23
+// compra de entradas de una funcion, de punta a punta (rf-04, rf-11, rf-14, rf-18, rf-20 a rf-23, rf-36):
+// elegir butacas con ocupacion en tiempo real -> resumen, productos y pago simulado -> comprobante.
+// la pagina orquesta: carga datos, escucha realtime y guarda el estado. el dibujo lo hacen los componentes de shared
 @Component({
   selector: 'app-funcion-mapa',
-  imports: [RouterLink, MapaButacas, ResumenCompra, PrecioArsPipe],
+  imports: [
+    RouterLink, MapaButacas, ResumenCompra, SelectorProductos, FormularioPago, ComprobanteCompra, PrecioArsPipe,
+  ],
   templateUrl: './funcion-mapa.html',
   styleUrl: './funcion-mapa.css',
 })
 export class FuncionMapa {
+  private readonly auth = inject(AuthService);
   private readonly funcionesService = inject(FuncionesService);
   private readonly butacasService = inject(ButacasService);
   private readonly ocupacionService = inject(OcupacionService);
   private readonly configuracion = inject(ConfiguracionService);
+  private readonly productosService = inject(ProductosService);
+  private readonly comprasService = inject(ComprasService);
 
   // llega desde la ruta /funcion/:id (withComponentInputBinding)
   readonly id = input.required<string>();
@@ -42,14 +56,25 @@ export class FuncionMapa {
   // los conjuntos se reemplazan por uno nuevo en cada cambio: asi los signals detectan la modificacion
   protected readonly ocupadas = signal<ReadonlySet<number>>(new Set());
   protected readonly seleccionadas = signal<ReadonlySet<number>>(new Set());
+  // cantidades de productos del candy bar: { idProducto: cantidad }
+  protected readonly cantidades = signal<Record<number, number>>({});
 
   protected readonly paso = signal<Paso>('elegir');
+  protected readonly comprobante = signal<Comprobante | null>(null);
+  protected readonly pagando = signal(false);
+  protected readonly errorPago = signal<string | null>(null);
+
+  // parametros del negocio (tabla configuracion). replican la cuenta de la rpc: la base los vuelve a aplicar
   protected readonly recargoVipPct = signal(0);
+  protected readonly primeraCompraPct = signal(0);
+  protected readonly puntosPorPeso = signal(0);
 
   protected readonly cargando = signal(true);
   protected readonly enVivo = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly aviso = signal<string | null>(null);
+
+  protected readonly productosDisponibles = this.productosService.activos;
 
   // nombre que ve el usuario de cada butaca ('A-5'), por id
   private readonly etiquetaDe = computed(() => {
@@ -86,9 +111,37 @@ export class FuncionMapa {
     () => this.seleccion().length > 0 && this.validacion().valida && !this.yaEmpezo(),
   );
 
-  // precio estimado (rf-20, rn-17). el servidor lo vuelve a calcular al confirmar la compra
+  // restriccion de edad de la pelicula (rf-11) y fecha de nacimiento del perfil, si hay sesion
+  protected readonly restriccion = computed(() => this.funcion()?.pelicula?.restriccion_edad ?? 0);
+  protected readonly fechaPerfil = computed(() => this.auth.perfil()?.fecha_nacimiento ?? null);
+
+  // cupon de primera compra (rf-30): solo usuarios registrados que todavia no lo usaron
+  protected readonly descuentoPct = computed(() => {
+    const perfil = this.auth.perfil();
+    return perfil !== null && !perfil.primera_compra_usada ? this.primeraCompraPct() : 0;
+  });
+
+  // precio de las butacas (rf-20, rn-17) y total de la compra (rf-22). son estimaciones: el servidor las recalcula
   protected readonly desglose = computed(() =>
     calcularPrecios(this.seleccion(), this.etiquetaDe(), this.funcion()?.precio_base ?? 0, this.recargoVipPct()),
+  );
+
+  protected readonly productosElegidos = computed<ProductoElegido[]>(() => {
+    const cantidades = this.cantidades();
+    return this.productosService
+      .activos()
+      .filter((p) => (cantidades[p.id] ?? 0) > 0)
+      .map((p) => ({ id: p.id, nombre: p.nombre, precio: p.precio, cantidad: cantidades[p.id] }));
+  });
+
+  // los puntos solo los acumulan los usuarios registrados
+  protected readonly totales = computed(() =>
+    calcularTotales(
+      this.desglose(),
+      this.productosElegidos(),
+      this.descuentoPct(),
+      this.auth.perfil() ? this.puntosPorPeso() : 0,
+    ),
   );
 
   // se exponen a la plantilla
@@ -118,16 +171,6 @@ export class FuncionMapa {
     });
   }
 
-  protected alternar(b: Butaca): void {
-    this.aviso.set(null);
-    this.seleccionadas.update((actual) => {
-      const nuevo = new Set(actual);
-      if (nuevo.has(b.id)) nuevo.delete(b.id);
-      else nuevo.add(b.id);
-      return nuevo;
-    });
-  }
-
   protected limpiar(): void {
     this.aviso.set(null);
     this.seleccionadas.set(new Set());
@@ -137,6 +180,7 @@ export class FuncionMapa {
   protected continuar(): void {
     if (!this.puedeContinuar()) return;
     this.aviso.set(null);
+    this.errorPago.set(null);
     this.paso.set('resumen');
   }
 
@@ -144,14 +188,67 @@ export class FuncionMapa {
     this.paso.set('elegir');
   }
 
+  // pago simulado + confirmacion atomica en la base (rf-22, rf-23)
+  protected async pagar(datos: DatosPago): Promise<void> {
+    const funcion = this.funcion();
+    if (!funcion || this.pagando()) return;
+
+    this.pagando.set(true);
+    this.errorPago.set(null);
+    try {
+      // el pago es simulado: una pausa breve y nada mas. no se cobra ni se guarda ningun dato de tarjeta
+      await new Promise((resolver) => setTimeout(resolver, 700));
+      const comprobante = await this.comprasService.confirmar({
+        funcionId: funcion.id,
+        butacaIds: this.seleccion().map((b) => b.id),
+        productos: this.productosElegidos().map((p) => ({ producto_id: p.id, cantidad: p.cantidad })),
+        fechaNacimiento: datos.fechaNacimiento,
+        medioPago: datos.medioPago,
+      });
+      this.comprobante.set(comprobante);
+      this.seleccionadas.set(new Set());
+      this.paso.set('confirmada');
+      // se refresca el perfil: los puntos cambiaron y el cupon de primera compra ya esta usado
+      void this.auth.cargarPerfil(this.auth.session()?.user.id);
+    } catch (e) {
+      const mensaje = mensajeError(e);
+      if (esConflictoDeButacas(mensaje)) {
+        // alguien se adelanto con alguna butaca: se vuelve al mapa a elegir otras
+        this.aviso.set(mensaje);
+        this.paso.set('elegir');
+        void this.recargarOcupadas(funcion.id);
+      } else {
+        this.errorPago.set(mensaje);
+      }
+    } finally {
+      this.pagando.set(false);
+    }
+  }
+
+  // despues de una compra: se vuelve al mapa con todo limpio
+  protected nuevaCompra(): void {
+    const funcion = this.funcion();
+    this.comprobante.set(null);
+    this.cantidades.set({});
+    this.seleccionadas.set(new Set());
+    this.errorPago.set(null);
+    this.aviso.set(null);
+    this.paso.set('elegir');
+    if (funcion) void this.recargarOcupadas(funcion.id);
+  }
+
   private reiniciar(): void {
     this.funcion.set(null);
     this.butacas.set([]);
     this.ocupadas.set(new Set());
     this.seleccionadas.set(new Set());
+    this.cantidades.set({});
+    this.comprobante.set(null);
     this.paso.set('elegir');
     this.error.set(null);
+    this.errorPago.set(null);
     this.aviso.set(null);
+    this.pagando.set(false);
     this.enVivo.set(false);
     this.cargando.set(true);
   }
@@ -164,16 +261,23 @@ export class FuncionMapa {
         this.error.set('La función no existe.');
         return;
       }
-      const [butacas, ocupadas, recargo] = await Promise.all([
+      // los productos son opcionales: si no cargan, se puede comprar igual solo las entradas
+      void this.productosService.cargarProductos().catch(() => undefined);
+
+      const [butacas, ocupadas, recargo, primera, puntos] = await Promise.all([
         this.butacasService.deSala(funcion.sala_id),
         this.ocupacionService.cargar(funcionId),
         this.configuracion.valorDe('recargo_vip_pct'),
+        this.configuracion.valorDe('primera_compra_pct'),
+        this.configuracion.valorDe('puntos_por_peso'),
       ]);
       if (this.funcionId() !== funcionId) return;
       this.funcion.set(funcion);
       this.butacas.set(butacas);
       this.ocupadas.set(new Set(ocupadas));
       this.recargoVipPct.set(recargo);
+      this.primeraCompraPct.set(primera);
+      this.puntosPorPeso.set(puntos);
     } catch (e) {
       this.error.set(`No se pudo cargar la función: ${mensajeError(e)}`);
     } finally {
@@ -213,9 +317,11 @@ export class FuncionMapa {
   }
 
   // si alguien ocupo una butaca que tenias elegida, se te quita y se te avisa (flujo alternativo del documento).
-  // si estabas en el resumen se vuelve al mapa: tu seleccion cambio y el total ya no corresponde
+  // si estabas en el resumen se vuelve al mapa: tu seleccion cambio y el total ya no corresponde.
+  // mientras se esta pagando no se hace nada: el aviso en vivo de TU propia compra puede llegar antes
+  // que la respuesta de la rpc, y si hubo un conflicto real la rpc lo informa
   private quitarSiEstabaElegida(butacaId: number): void {
-    if (!this.seleccionadas().has(butacaId)) return;
+    if (this.pagando() || !this.seleccionadas().has(butacaId)) return;
     this.seleccionadas.update((actual) => {
       const nuevo = new Set(actual);
       nuevo.delete(butacaId);

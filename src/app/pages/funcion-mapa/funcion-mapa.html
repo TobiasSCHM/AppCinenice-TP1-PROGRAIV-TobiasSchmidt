@@ -22,45 +22,70 @@
     </span>
   </header>
 
-  @if (yaEmpezo()) {
+  @if (yaEmpezo() && paso() !== 'confirmada') {
     <p class="error" role="alert">Esta función ya comenzó: no se pueden comprar entradas.</p>
   }
 
-  @if (paso() === 'elegir') {
-    <app-mapa-butacas
-      [butacas]="butacas()"
-      [ocupadas]="ocupadas()"
-      [seleccionadas]="seleccionadas()"
-      (alternar)="alternar($event)" />
+  @switch (paso()) {
+    @case ('elegir') {
+      <app-mapa-butacas
+        [butacas]="butacas()"
+        [ocupadas]="ocupadas()"
+        [(seleccionadas)]="seleccionadas"
+        (seleccionadasChange)="aviso.set(null)" />
 
-    <section class="tarjeta seleccion" aria-live="polite">
-      <h3>Tu selección</h3>
+      <section class="tarjeta seleccion" aria-live="polite">
+        <h3>Tu selección</h3>
 
-      @if (seleccion().length === 0) {
-        <p class="ayuda">
-          Tocá las butacas libres para elegirlas. Tienen que estar seguidas, en la misma fila y sin un pasillo en el medio.
-        </p>
-      } @else {
-        <p>
-          <strong>{{ seleccion().length }}</strong>
-          {{ seleccion().length === 1 ? 'butaca' : 'butacas' }}: {{ textoSeleccion() }}
-        </p>
-        @if (motivoError(); as motivo) {
-          <p class="error" role="alert">{{ motivo }}</p>
+        @if (seleccion().length === 0) {
+          <p class="ayuda">
+            Tocá las butacas libres para elegirlas. Tienen que estar seguidas, en la misma fila y sin un pasillo en el medio.
+          </p>
         } @else {
-          <p class="ok">Selección válida.</p>
+          <p>
+            <strong>{{ seleccion().length }}</strong>
+            {{ seleccion().length === 1 ? 'butaca' : 'butacas' }}: {{ textoSeleccion() }}
+          </p>
+          @if (motivoError(); as motivo) {
+            <p class="error" role="alert">{{ motivo }}</p>
+          } @else {
+            <p class="ok">Selección válida.</p>
+          }
+          <div class="acciones">
+            <button type="button" class="boton" [disabled]="!puedeContinuar()" (click)="continuar()">Continuar</button>
+            <button type="button" class="boton boton-secundario" (click)="limpiar()">Limpiar selección</button>
+          </div>
         }
-        <div class="acciones">
-          <button type="button" class="boton" [disabled]="!puedeContinuar()" (click)="continuar()">Continuar</button>
-          <button type="button" class="boton boton-secundario" (click)="limpiar()">Limpiar selección</button>
-        </div>
-      }
 
-      @if (aviso(); as a) {
-        <p class="aviso" role="status">{{ a }}</p>
+        @if (aviso(); as a) {
+          <p class="aviso" role="status">{{ a }}</p>
+        }
+      </section>
+    }
+
+    @case ('resumen') {
+      <app-resumen-compra
+        [totales]="totales()"
+        [recargoPct]="recargoVipPct()"
+        [descuentoPct]="descuentoPct()"
+        [restriccionEdad]="restriccion()"
+        (volver)="volverAElegir()" />
+
+      <app-selector-productos [productos]="productosDisponibles()" [(cantidades)]="cantidades" />
+
+      <app-formulario-pago
+        [restriccion]="restriccion()"
+        [fechaPerfil]="fechaPerfil()"
+        [total]="totales().total"
+        [pagando]="pagando()"
+        [errorPago]="errorPago()"
+        (pagar)="pagar($event)" />
+    }
+
+    @case ('confirmada') {
+      @if (comprobante(); as c) {
+        <app-comprobante-compra [comprobante]="c" (nuevaCompra)="nuevaCompra()" />
       }
-    </section>
-  } @else {
-    <app-resumen-compra [desglose]="desglose()" [recargoPct]="recargoVipPct()" (volver)="volverAElegir()" />
+    }
   }
 }

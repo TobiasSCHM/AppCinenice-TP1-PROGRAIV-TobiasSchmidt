@@ -17,3 +17,8 @@
   margin: var(--espacio-3) 0 0; padding: var(--espacio-2) var(--espacio-3);
   border-left: 3px solid var(--rojo); background: var(--color-superficie-2);
 }
+
+/* en el resumen las tarjetas se apilan con aire entre ellas */
+app-resumen-compra, app-selector-productos, app-formulario-pago, app-comprobante-compra {
+  display: block; max-width: 560px; margin: 0 auto var(--espacio-4);
+}
