@@ -56,3 +56,65 @@ export function calcularPrecios(
     cantidadVip,
   };
 }
+
+export interface ProductoElegido {
+  id: number;
+  nombre: string;
+  precio: number;
+  cantidad: number;
+}
+
+export interface LineaProducto {
+  productoId: number;
+  nombre: string;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal: number;
+}
+
+export interface TotalesCompra {
+  entradas: DesglosePrecios;
+  productos: LineaProducto[];
+  totalProductos: number;
+  descuento: number; // cupon de primera compra: se aplica solo sobre las entradas
+  total: number;
+  puntos: number;
+}
+
+// total de la compra (rf-22, rf-30, rf-32). replica la cuenta de la rpc confirmar_compra para que
+// el total que ve el usuario coincida con lo que se cobra. todo en centavos enteros.
+// descuentoPct: 0 si no tiene cupon. puntosPorPeso: 0 para el comprador anonimo
+export function calcularTotales(
+  entradas: DesglosePrecios,
+  productos: readonly ProductoElegido[],
+  descuentoPct: number,
+  puntosPorPeso: number,
+): TotalesCompra {
+  const entradasCentavos = Math.round(entradas.total * 100);
+  const descuentoCentavos = Math.round((entradasCentavos * descuentoPct) / 100);
+
+  let productosCentavos = 0;
+  const lineas = productos
+    .filter((p) => p.cantidad > 0)
+    .map((p) => {
+      const subtotalCentavos = Math.round(p.precio * 100) * p.cantidad;
+      productosCentavos += subtotalCentavos;
+      return {
+        productoId: p.id,
+        nombre: p.nombre,
+        cantidad: p.cantidad,
+        precioUnitario: p.precio,
+        subtotal: subtotalCentavos / 100,
+      };
+    });
+
+  const totalCentavos = entradasCentavos - descuentoCentavos + productosCentavos;
+  return {
+    entradas,
+    productos: lineas,
+    totalProductos: productosCentavos / 100,
+    descuento: descuentoCentavos / 100,
+    total: totalCentavos / 100,
+    puntos: Math.floor((totalCentavos * puntosPorPeso) / 100),
+  };
+}

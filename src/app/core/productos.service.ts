@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { supabase } from './supabase.client';
 import { mensajeError } from './utils/errores';
 import { subirImagenPublica } from './utils/storage';
@@ -12,6 +12,8 @@ const SELECT_PRODUCTO =
 export class ProductosService {
   readonly categorias = signal<CategoriaProducto[]>([]);
   readonly productos = signal<Producto[]>([]);
+    // solo los productos a la venta: lo que ve el cliente (los inactivos los gestiona el admin)
+  readonly activos = computed(() => this.productos().filter((p) => p.activo));
 
   async cargarCategorias(): Promise<void> {
     const { data, error } = await supabase.from('categorias_producto').select('id, nombre').order('nombre');
